@@ -1,1237 +1,260 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>42 RNCP Planner</title>
+<title>42 RNCP Planner — Comparaison</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  background: #0a0a12;
-  color: #d0d0e0;
-  line-height: 1.4;
-  padding: 12px;
-  font-size: 12px;
-  max-width: 1400px;
-  margin: 0 auto;
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SFMono-Regular',Consolas,monospace;background:#0a0a12;color:#d0d0e0;font-size:12px;padding:12px;max-width:1400px;margin:0 auto;line-height:1.4}
+h1{font-size:16px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+h1 .dot{width:8px;height:8px;border-radius:50%;background:#4a9eff}
+.tabs{display:flex;gap:2px;flex-wrap:wrap}
+.tabs button{background:#14141f;color:#8080a0;border:1px solid #1a1a2e;padding:4px 10px;font-size:11px;cursor:pointer;border-radius:4px;transition:.15s}
+.tabs button:hover{background:#1a1a28;color:#a0a0c0}
+.tabs button.active{background:#4a9eff;color:#050508;font-weight:600}
+section{margin-bottom:16px}
+section h2{font-size:13px;font-weight:600;color:#a0a0b0;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+section h2 .g{width:6px;height:6px;border-radius:50%}
+table{border-collapse:collapse;width:100%}
+th,td{padding:4px 8px;border-bottom:1px solid #14141f;text-align:left;font-size:11px;white-space:nowrap}
+th{background:#14141f;color:#606080;font-weight:500;position:sticky;top:0}
+th.col-name{position:sticky;left:0;background:#1a1a2e;border-right:1px solid #1a1a2e}
+td.first-col{position:sticky;left:0;background:#0d0d14;border-right:1px solid #1a1a2e;color:#b0b0c0;font-weight:500}
+.yes{color:#4a9eff;font-weight:600}
+.no{color:#303040}
+.total{background:#14141f;border-top:2px solid #4a9eff}
+.total td{color:#a0a0ff;font-weight:600}
+.summary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.card{background:#14141f;border:1px solid #1a1a2e;border-radius:4px;padding:6px 10px;font-size:11px;min-width:120px}
+.card .v{font-size:16px;font-weight:600;color:#4a9eff}
+.card .l{color:#606080;font-size:10px}
+.group-header{background:#1a1a2e;color:#ff8080;font-weight:600;border-top:2px solid #ff8080}
+@media (max-width:800px){body{font-size:11px;padding:6px}}
+</style>
+<script>
+function showTrack(i){
+  document.querySelectorAll('section[id^="track-"]').forEach((s,idx)=>{s.style.display=idx===i?'':'none'});
+  document.querySelectorAll('.tabs button').forEach((b,idx)=>{b.classList.toggle('active',idx===i)});
 }
-/* Header */
-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #1a1a2e;
-}
-header h1 { 
-  font-size: 16px; 
-  font-weight: 600; 
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-header h1 .dot { width: 8px; height: 8px; border-radius: 50%; background: #4a9eff; }
-.tabs { display: flex; gap: 2px; flex-wrap: wrap; }
-.tabs button {
-  background: #14141f;
-  color: #8080a0;
-  border: 1px solid #1a1a2e;
-  padding: 4px 10px;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all .15s;
-}
-.tabs button:hover { background: #1a1a28; color: #a0a0c0; }
-.tabs button.active { background: #4a9eff; color: #050508; font-weight: 600; }
-/* Section */
-section { margin-bottom: 16px; }
-section h2 {
-  font-size: 13px;
-  font-weight: 600;
-  color: #a0a0b0;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-section h2 .g { width: 6px; height: 6px; border-radius: 50%; }
-/* Comparison matrix */
-.matrix {
-  overflow-x: auto;
-  border: 1px solid #1a1a2e;
-  border-radius: 4px;
-  background: #0d0d14;
-}
-.matrix table { border-collapse: collapse; width: 100%; font-size: 11px; }
-.matrix th {
-  background: #14141f;
-  color: #606080;
-  padding: 4px 6px;
-  text-align: center;
-  font-weight: 500;
-  border-bottom: 1px solid #1a1a2e;
-  position: sticky;
-  top: 0;
-  white-space: nowrap;
-}
-.matrix th.col-name { 
-  position: sticky; 
-  left: 0; 
-  background: #1a1a2e; 
-  color: #8080a0;
-  font-weight: 500;
-  text-align: left;
-}
-.matrix td {
-  padding: 3px 6px;
-  text-align: center;
-  border-bottom: 1px solid #14141f;
-  font-size: 11px;
-  white-space: nowrap;
-}
-.matrix td.col-name {
-  text-align: left;
-  color: #b0b0c0;
-  font-weight: 500;
-  position: sticky;
-  left: 0;
-  background: #0d0d14;
-  border-right: 1px solid #1a1a2e;
-}
-.matrix tr:hover td { background: #12121a; }
-.matrix .yes { color: #4a9eff; font-weight: 600; }
-.matrix .no { color: #303040; }
-/* Legend */
-.legend { display: flex; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
-.legend span { font-size: 11px; color: #606080; display: flex; align-items: center; gap: 4px; }
-.legend .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-/* Project list */
-.projs { 
-  border: 1px solid #1a1a2e; 
-  border-radius: 4px; 
-  background: #0d0d14;
-  overflow: hidden;
-}
-.projs table { border-collapse: collapse; width: 100%; font-size: 11px; }
-.projs th {
-  background: #14141f;
-  color: #606080;
-  padding: 4px 8px;
-  text-align: left;
-  font-weight: 500;
-  border-bottom: 1px solid #1a1a2e;
-  font-size: 11px;
-}
-.projs td {
-  padding: 2px 8px;
-  border-bottom: 1px solid #14141f;
-  font-size: 11px;
-}
-.projs tr:hover td { background: #12121a; }
-.projs .name { color: #b0b0c0; font-weight: 500; }
-.projs .deps { font-family: inherit; }
-.badge {
-  display: inline-block;
-  background: #1a1a2e;
-  color: #80a0ff;
-  border: 1px solid #2a2a4e;
-  border-radius: 3px;
-  padding: 0 4px;
-  font-size: 10px;
-  margin-right: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100px;
-}
-.badge.more { color: #8080a0; font-style: italic; }
-.tag {
-  display: inline-block;
-  padding: 0 4px;
-  border-radius: 3px;
-  font-size: 9px;
-  font-weight: 600;
-  line-height: 1.4;
-}
-.tag-exam { background: #3a2a0a; color: #e0c060; border: 1px solid #5a3e10; }
-.tag-norm { background: #1a2a1a; color: #60d080; border: 1px solid #2a5a30; }
-.tag-proj { background: #1a1a2e; color: #80a0ff; border: 1px solid #2a2a4e; }
-.tag-shared { background: #2a1a1a; color: #ff8080; border: 1px solid #5a2a30; }
-.tag-exp { background: #2a2a1a; color: #80d0d0; border: 1px solid #3a5a5a; }
-.meta { color: #606080; }
-/* Summary cards */
-.summary { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-.card {
-  background: #14141f;
-  border: 1px solid #1a1a2e;
-  border-radius: 4px;
-  padding: 6px 10px;
-  font-size: 11px;
-  flex: 1;
-  min-width: 120px;
-}
-.card .v { font-size: 16px; font-weight: 600; color: #4a9eff; }
-.card .l { color: #606080; font-size: 10px; }
-/* Responsive */
-@media (max-width: 800px) {
-  body { padding: 6px; font-size: 11px; }
-  .matrix th, .projs th { font-size: 10px; padding: 2px 4px; }
-  .projs td { padding: 2px 4px; }
-}
-</style></head><body>
-<header>
-<h1><span class="dot"></span> 42 RNCP Planner — Speedrun Edition</h1>
+</script>
+</head><body>
+<h1><span class="dot"></span>42 RNCP Planner — Comparaison des Combinaisons</h1>
 <div class="tabs">
 <button class="active" onclick="showTrack(0)">RNCP 6</button>
 <button class="" onclick="showTrack(1)">RNCP 7</button>
+<button class="" onclick="showTrack(2)">Comparaison</button>
 </div>
-</header>
-<section>
-<h2><span class="g" style="background:#4a9eff"></span> Overview</h2>
-<div class="summary">
-<div class="card"><div class="v">76</div><div class="l">Projects</div></div>
-<div class="card"><div class="v">2</div><div class="l">RNCP Tracks</div></div>
-<div class="card"><div class="v">4</div><div class="l">Total Options</div></div>
-<div class="card"><div class="v">9</div><div class="l">Shared Projects</div></div>
-<div class="card"><div class="v">4</div><div class="l">Possible Combinations</div></div>
-</div>
-<div class="legend">
-<span><span class="dot" style="background:#4a9eff"></span> In this option</span>
-<span><span class="dot" style="background:#303040"></span> Not included</span>
-<span><span class="badge">dependency</span> = prerequisite</span>
-<span><span class="tag tag-exam">exam</span></span>
-<span><span class="tag tag-shared">shared</span></span>
-</div>
-</section>
-<section>
-<h2><span class="g" style="background:#606080"></span> Comparison Matrix</h2>
-<div style="margin-bottom:6px;font-size:10px;color:#505060">
-Green ✓ = project included in this option | — = not in this option
-</div>
-<div class="matrix"><table><thead><tr>
-<th class="col-name" style="min-width:140px">Project</th>
-<th style="width:60px">XP</th>
-<th>RNCP 6 › Option 1 — Web/Mobile</th>
-<th>RNCP 6 › Option 2 — Applicatif</th>
-<th>RNCP 7 › Option 1 — SI/Réseaux</th>
-<th>RNCP 7 › Option 2 — Data</th>
-</tr></thead><tbody>
-<tr>
-<td class="col-name">42sh</td>
-<td class="meta">15.75k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">AccessibleDirectory</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">ActiveConnect</td>
-<td class="meta">15.75k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">ActiveDiscovery</td>
-<td class="meta">15.75k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">ActiveTechTales</td>
-<td class="meta">15.75k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">AdministrativeDirectory</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">AutomaticDirectory</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">avaj-launcher</td>
-<td class="meta">4.2k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">BADASS</td>
-<td class="meta">22.45k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">bomberman</td>
-<td class="meta">25.2k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">boot2root</td>
-<td class="meta">11.5k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">camagru</td>
-<td class="meta">4.2k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">cloud-1</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">Cybersecurity</td>
-<td class="meta">0</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">darkly</td>
-<td class="meta">6.3k</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">doom-nukem</td>
-<td class="meta">15.75k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">dslr</td>
-<td class="meta">6k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">famine</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">fix-me</td>
-<td class="meta">15.75k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">ft_ality</td>
-<td class="meta">4.2k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">ft_hangouts</td>
-<td class="meta">4.2k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">ft_linux</td>
-<td class="meta">4.2k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">ft_malcolm</td>
-<td class="meta">6k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">ft_nmap</td>
-<td class="meta">15.75k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">ft_ping</td>
-<td class="meta">4.2k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">ft_script</td>
-<td class="meta">4.2k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">ft_select</td>
-<td class="meta">4.2k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">ft_shield</td>
-<td class="meta">15.75k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">ft_ssl_md5</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">ft_traceroute</td>
-<td class="meta">4.2k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">ft_turing</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">gbmu</td>
-<td class="meta">31.5k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">h42n42</td>
-<td class="meta">9.45k</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">humangl</td>
-<td class="meta">4.2k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">hypertube</td>
-<td class="meta">15.75k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">Inception-of-Things</td>
-<td class="meta">25.45k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">kfs-1</td>
-<td class="meta">15.75k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">kfs-2</td>
-<td class="meta">15.75k</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">kfs-3</td>
-<td class="meta">35.7k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">kfs-4</td>
-<td class="meta">25.2k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">kfs-5</td>
-<td class="meta">35.7k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">kfs-6</td>
-<td class="meta">25.2k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">kfs-7</td>
-<td class="meta">35.7k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">kfs-8</td>
-<td class="meta">15.75k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">kfs-9</td>
-<td class="meta">15.75k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">kfs-x</td>
-<td class="meta">35.7k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">lem-ipc</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">libasm</td>
-<td class="meta">966</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">little-penguin-1</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">malloc</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">matcha</td>
-<td class="meta">9.45k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">matt-daemon</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">MicroForensX</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">Mobile</td>
-<td class="meta">0</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">nibbler</td>
-<td class="meta">9.45k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">nm</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">override</td>
-<td class="meta">35.7k</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">pestilence</td>
-<td class="meta">15.75k</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">Piscine Django</td>
-<td class="meta">0</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">Piscine Object</td>
-<td class="meta">0</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">Piscine ocaml</td>
-<td class="meta">0</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">Piscine PHP Symfony</td>
-<td class="meta">9.45k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">Piscine Ruby on Rails</td>
-<td class="meta">9.45k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">rainfall</td>
-<td class="meta">25.2k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">red-tetris</td>
-<td class="meta">15.75k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">rt</td>
-<td class="meta">20.75k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">snow-crash</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">strace</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">swifty-companion</td>
-<td class="meta">4.2k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">swifty-proteins</td>
-<td class="meta">15.75k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">swingy</td>
-<td class="meta">9.45k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">taskmaster</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">total-perspective-vortex</td>
-<td class="meta">9.45k</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-<tr>
-<td class="col-name">UnleashTheBox</td>
-<td class="meta">15.75k</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">woody-woodpacker</td>
-<td class="meta">9.45k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-</tr>
-<tr>
-<td class="col-name">zappy</td>
-<td class="meta">25.2k</td>
-<td class="no">—</td>
-<td class="yes">✓</td>
-<td class="yes">✓</td>
-<td class="no">—</td>
-</tr>
-</tbody></table></div>
-</section>
-<section>
-<h2><span class="g" style="background:#ff6060"></span> Meilleure vs 2e Combinaison</h2>
-<div style="margin-bottom:6px;font-size:10px;color:#505060">
-✓ = inclut ce projet | — = ne l'inclut pas
-</div>
-<table style="width:100%;border-collapse:collapse;font-size:11px;border:1px solid #1a1a2e;border-radius:4px;overflow:hidden">
-<thead><tr style="background:#14141f">
-<th style="padding:4px 8px;text-align:left;color:#606080;border-bottom:1px solid #1a1a2e">Projet</th>
-<th style="padding:4px 8px;text-align:center;color:#606080;border-bottom:1px solid #1a1a2e">Meilleure</th>
-<th style="padding:4px 8px;text-align:center;color:#606080;border-bottom:1px solid #1a1a2e">2e Combinaison</th>
-<th style="padding:4px 8px;text-align:center;color:#606080;border-bottom:1px solid #1a1a2e">Commentaire</th>
-</tr></thead><tbody>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">Commun (dans les 2 combinaisons)</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ shared</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">Piscine PHP Symfony</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">Piscine Ruby on Rails</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">nibbler</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">matcha</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">swingy</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">ft_hangouts</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">swifty-companion</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">camagru</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">avaj-launcher</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">bomberman</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">red-tetris</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">hypertube</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">fix-me</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">swifty-proteins</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">Piscine Django</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">Mobile</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">Piscine Object</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">woody-woodpacker</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">ft_ssl_md5</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">famine</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">ft_turing</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">snow-crash</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">dslr</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">ft_malcolm</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">ft_ping</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">ft_traceroute</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">ft_ality</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">rainfall</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">ft_shield</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">ft_nmap</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">boot2root</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">Piscine ocaml</td>
-<td style="padding:3px 8px;text-align:center">—</td>
-<td style="padding:3px 8px;text-align:center">✓</td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">+ added (2nd)</td>
-</tr>
-<tr style="border-bottom:1px solid #14141f">
-<td style="padding:3px 8px;color:#b0b0c0;font-weight:500">TOTAL</td>
-<td style="padding:3px 8px;text-align:center"></td>
-<td style="padding:3px 8px;text-align:center"></td>
-<td style="padding:3px 8px;text-align:center;color:#8080a0;font-size:10px">725k XP • 51 proj • 713k XP • 49 proj</td>
-</tr>
-</tbody></table>
-</section>
+
+<!-- RNCP 6 View -->
 <section id="track-0" style="display:block">
-<h2>RNCP 6 — Option Detail</h2>
-<div class="projs" style="margin-bottom:8px">
-<table><thead><tr>
-<th style="min-width:120px">Project</th>
-<th style="width:60px">XP</th>
-<th style="width:50px">Dur</th>
-<th>Deps (bricoles)</th>
-<th>Type</th>
-</tr></thead><tbody>
-<tr><td class="name">override</td><td class="meta">35.7k</td><td class="meta">3.0w</td><td class="deps"><span class="badge">nm</span><span class="badge">→woody-woodpacker</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">Inception-of-Things</td><td class="meta">25.45k</td><td class="meta">6.2w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">bomberman</td><td class="meta">25.2k</td><td class="meta">0.1w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">BADASS</td><td class="meta">22.45k</td><td class="meta"></td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">rt</td><td class="meta">20.75k</td><td class="meta">4.3w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">fix-me</td><td class="meta">15.75k</td><td class="meta">8.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">hypertube</td><td class="meta">15.75k</td><td class="meta">0.9w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">red-tetris</td><td class="meta">15.75k</td><td class="meta">6.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">swifty-proteins</td><td class="meta">15.75k</td><td class="meta">2.9w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">42sh</td><td class="meta">15.75k</td><td class="meta">0.1w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">doom-nukem</td><td class="meta">15.75k</td><td class="meta">0.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-2</td><td class="meta">15.75k</td><td class="meta">3.0w</td><td class="deps"><span class="badge">kfs-1</span><span class="badge">→kfs-3</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">pestilence</td><td class="meta">15.75k</td><td class="meta">5.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">h42n42</td><td class="meta">9.45k</td><td class="meta">16.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">matcha</td><td class="meta">9.45k</td><td class="meta">3.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">nibbler</td><td class="meta">9.45k</td><td class="meta">0.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">Piscine PHP Symfony</td><td class="meta">9.45k</td><td class="meta"></td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">Piscine Ruby on Rails</td><td class="meta">9.45k</td><td class="meta"></td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">swingy</td><td class="meta">9.45k</td><td class="meta">9.5w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">total-perspective-vortex</td><td class="meta">9.45k</td><td class="meta">19.4w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">darkly</td><td class="meta">6.3k</td><td class="meta">4.4w</td><td class="deps"><span class="badge">snow-crash</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">avaj-launcher</td><td class="meta">4.2k</td><td class="meta">6.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">camagru</td><td class="meta">4.2k</td><td class="meta">1.3w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_hangouts</td><td class="meta">4.2k</td><td class="meta">6.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">swifty-companion</td><td class="meta">4.2k</td><td class="meta">7.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">humangl</td><td class="meta">4.2k</td><td class="meta">6.2w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">Mobile</td><td class="meta">0</td><td class="meta">17.2w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">Piscine Object</td><td class="meta">0</td><td class="meta">25.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">Piscine Django</td><td class="meta">0</td><td class="meta">13.2w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-</tbody></table>
-<div style="background:#14141f;padding:3px 8px;font-size:10px;color:#505060;border-top:1px solid #1a1a2e">
-Option 1 — Web/Mobile: 29 projects • 349k XP • 42k req • min 29 projects</div>
+<h2>📊 Projets RNCP 6 (42k XP requis)</h2>
+<div class="summary">
+<div class="card"><div class="v">31</div><div class="l">Option 1 — Web/Mobile</div></div>
+<div class="card"><div class="v">37</div><div class="l">Option 2 — Applicatif</div></div>
 </div>
-<div class="projs" style="margin-bottom:8px">
-<table><thead><tr>
-<th style="min-width:120px">Project</th>
-<th style="width:60px">XP</th>
-<th style="width:50px">Dur</th>
-<th>Deps (bricoles)</th>
-<th>Type</th>
-</tr></thead><tbody>
-<tr><td class="name">override</td><td class="meta">35.7k</td><td class="meta">3.0w</td><td class="deps"><span class="badge">nm</span><span class="badge">→woody-woodpacker</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">rainfall</td><td class="meta">25.2k</td><td class="meta">4.5w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">zappy</td><td class="meta">25.2k</td><td class="meta">2.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_shield</td><td class="meta">15.75k</td><td class="meta">4.1w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-1</td><td class="meta">15.75k</td><td class="meta">4.6w</td><td class="deps"><span class="badge">→kfs-2</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-2</td><td class="meta">15.75k</td><td class="meta">3.0w</td><td class="deps"><span class="badge">kfs-1</span><span class="badge">→kfs-3</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">pestilence</td><td class="meta">15.75k</td><td class="meta">5.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_nmap</td><td class="meta">15.75k</td><td class="meta">6.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">boot2root</td><td class="meta">11.5k</td><td class="meta">2.9w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_turing</td><td class="meta">9.45k</td><td class="meta">4.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">h42n42</td><td class="meta">9.45k</td><td class="meta">16.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">famine</td><td class="meta">9.45k</td><td class="meta">5.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_ssl_md5</td><td class="meta">9.45k</td><td class="meta">4.8w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">lem-ipc</td><td class="meta">9.45k</td><td class="meta">4.3w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">little-penguin-1</td><td class="meta">9.45k</td><td class="meta">6.2w</td><td class="deps"><span class="badge">ft_linux</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">malloc</td><td class="meta">9.45k</td><td class="meta">3.1w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">matt-daemon</td><td class="meta">9.45k</td><td class="meta">1.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">nm</td><td class="meta">9.45k</td><td class="meta">3.2w</td><td class="deps"><span class="badge">→override</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">snow-crash</td><td class="meta">9.45k</td><td class="meta">3.7w</td><td class="deps"><span class="badge">→darkly</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">strace</td><td class="meta">9.45k</td><td class="meta">3.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">taskmaster</td><td class="meta">9.45k</td><td class="meta">4.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">woody-woodpacker</td><td class="meta">9.45k</td><td class="meta">4.7w</td><td class="deps"><span class="badge">override</span><span class="badge">nm</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">darkly</td><td class="meta">6.3k</td><td class="meta">4.4w</td><td class="deps"><span class="badge">snow-crash</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_malcolm</td><td class="meta">6k</td><td class="meta">10.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">dslr</td><td class="meta">6k</td><td class="meta">5.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_ality</td><td class="meta">4.2k</td><td class="meta">7.1w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_linux</td><td class="meta">4.2k</td><td class="meta">10.6w</td><td class="deps"><span class="badge">→little-penguin-1</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_script</td><td class="meta">4.2k</td><td class="meta">0.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_select</td><td class="meta">4.2k</td><td class="meta">0.9w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_ping</td><td class="meta">4.2k</td><td class="meta">9.1w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_traceroute</td><td class="meta">4.2k</td><td class="meta">3.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">libasm</td><td class="meta">966</td><td class="meta">5.9w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">Piscine ocaml</td><td class="meta">0</td><td class="meta">3.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
+<table>
+<thead><tr><th class="col-name">Project</th><th style="width:60px">Web/Mobile</th><th style="width:60px">Applicatif</th><th style="width:60px">XP</th></tr></thead>
+<tbody>
+<tr><td class="first-col">42sh</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">avaj-launcher</td><td class="yes">✓</td><td class="no">—</td><td class="meta">4.2k</td></tr>
+<tr><td class="first-col">BADASS</td><td class="yes">✓</td><td class="no">—</td><td class="meta">22.45k</td></tr>
+<tr><td class="first-col">bomberman</td><td class="yes">✓</td><td class="no">—</td><td class="meta">25.2k</td></tr>
+<tr><td class="first-col">camagru</td><td class="yes">✓</td><td class="no">—</td><td class="meta">4.2k</td></tr>
+<tr><td class="first-col">darkly</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">6.3k</td></tr>
+<tr><td class="first-col">doom-nukem</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">fix-me</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP6 - 1 an</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">90k</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP6 - 2 ans</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">150k</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP7 - 1 an</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">90k</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP7 - 2 ans</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">180k</td></tr>
+<tr><td class="first-col">ft_hangouts</td><td class="yes">✓</td><td class="no">—</td><td class="meta">4.2k</td></tr>
+<tr><td class="first-col">h42n42</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">humangl</td><td class="yes">✓</td><td class="no">—</td><td class="meta">4.2k</td></tr>
+<tr><td class="first-col">hypertube</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">Inception-of-Things</td><td class="yes">✓</td><td class="no">—</td><td class="meta">25.45k</td></tr>
+<tr><td class="first-col">Internship I</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">42k</td></tr>
+<tr><td class="first-col">Internship II</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">63k</td></tr>
+<tr><td class="first-col">kfs-2</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">matcha</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">Mobile</td><td class="yes">✓</td><td class="no">—</td><td class="meta">0k</td></tr>
+<tr><td class="first-col">nibbler</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">override</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">35.7k</td></tr>
+<tr><td class="first-col">Part_Time I</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">42k</td></tr>
+<tr><td class="first-col">Part_Time II</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">63k</td></tr>
+<tr><td class="first-col">pestilence</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">Piscine Django</td><td class="yes">✓</td><td class="no">—</td><td class="meta">0k</td></tr>
+<tr><td class="first-col">Piscine Object</td><td class="yes">✓</td><td class="no">—</td><td class="meta">0k</td></tr>
+<tr><td class="first-col">Piscine PHP Symfony</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">Piscine Ruby on Rails</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">red-tetris</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">rt</td><td class="yes">✓</td><td class="no">—</td><td class="meta">20.75k</td></tr>
+<tr><td class="first-col">Startup Internship</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">42k</td></tr>
+<tr><td class="first-col">swifty-companion</td><td class="yes">✓</td><td class="no">—</td><td class="meta">4.2k</td></tr>
+<tr><td class="first-col">swifty-proteins</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">swingy</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">total-perspective-vortex</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
 </tbody></table>
-<div style="background:#14141f;padding:3px 8px;font-size:10px;color:#505060;border-top:1px solid #1a1a2e">
-Option 2 — Applicatif: 33 projects • 343.666k XP • 42k req • min 33 projects</div>
-</div>
 </section>
+
+<!-- RNCP 7 View -->
 <section id="track-1" style="display:none">
-<h2>RNCP 7 — Option Detail</h2>
-<div class="projs" style="margin-bottom:8px">
-<table><thead><tr>
-<th style="min-width:120px">Project</th>
-<th style="width:60px">XP</th>
-<th style="width:50px">Dur</th>
-<th>Deps (bricoles)</th>
-<th>Type</th>
-</tr></thead><tbody>
-<tr><td class="name">kfs-3</td><td class="meta">35.7k</td><td class="meta">3.7w</td><td class="deps"><span class="badge">kfs-2</span><span class="badge">kfs-1</span><span class="badge">→kfs-4</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-5</td><td class="meta">35.7k</td><td class="meta">5.9w</td><td class="deps"><span class="badge">kfs-4</span><span class="badge">kfs-3</span><span class="badge">kfs-2</span><span class="badge more">+2 more</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-7</td><td class="meta">35.7k</td><td class="meta">0.0w</td><td class="deps"><span class="badge">kfs-6</span><span class="badge">kfs-5</span><span class="badge">kfs-4</span><span class="badge more">+4 more</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-x</td><td class="meta">35.7k</td><td class="meta">0.0w</td><td class="deps"><span class="badge">kfs-9</span><span class="badge">kfs-8</span><span class="badge">kfs-7</span><span class="badge more">+6 more</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">override</td><td class="meta">35.7k</td><td class="meta">3.0w</td><td class="deps"><span class="badge">nm</span><span class="badge">→woody-woodpacker</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">gbmu</td><td class="meta">31.5k</td><td class="meta">11.4w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">Inception-of-Things</td><td class="meta">25.45k</td><td class="meta">6.2w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-4</td><td class="meta">25.2k</td><td class="meta">2.5w</td><td class="deps"><span class="badge">kfs-3</span><span class="badge">kfs-2</span><span class="badge">kfs-1</span><span class="badge more">+1 more</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-6</td><td class="meta">25.2k</td><td class="meta">7.6w</td><td class="deps"><span class="badge">kfs-5</span><span class="badge">kfs-4</span><span class="badge">kfs-3</span><span class="badge more">+3 more</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">zappy</td><td class="meta">25.2k</td><td class="meta">2.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">BADASS</td><td class="meta">22.45k</td><td class="meta"></td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">rt</td><td class="meta">20.75k</td><td class="meta">4.3w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-1</td><td class="meta">15.75k</td><td class="meta">4.6w</td><td class="deps"><span class="badge">→kfs-2</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-2</td><td class="meta">15.75k</td><td class="meta">3.0w</td><td class="deps"><span class="badge">kfs-1</span><span class="badge">→kfs-3</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-8</td><td class="meta">15.75k</td><td class="meta">0.0w</td><td class="deps"><span class="badge">kfs-7</span><span class="badge">kfs-6</span><span class="badge">kfs-5</span><span class="badge more">+5 more</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-9</td><td class="meta">15.75k</td><td class="meta">0.1w</td><td class="deps"><span class="badge">kfs-8</span><span class="badge">kfs-7</span><span class="badge">kfs-6</span><span class="badge more">+6 more</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">42sh</td><td class="meta">15.75k</td><td class="meta">0.1w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">doom-nukem</td><td class="meta">15.75k</td><td class="meta">0.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">kfs-2</td><td class="meta">15.75k</td><td class="meta">3.0w</td><td class="deps"><span class="badge">kfs-1</span><span class="badge">→kfs-3</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">pestilence</td><td class="meta">15.75k</td><td class="meta">5.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">lem-ipc</td><td class="meta">9.45k</td><td class="meta">4.3w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">little-penguin-1</td><td class="meta">9.45k</td><td class="meta">6.2w</td><td class="deps"><span class="badge">ft_linux</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">malloc</td><td class="meta">9.45k</td><td class="meta">3.1w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">matt-daemon</td><td class="meta">9.45k</td><td class="meta">1.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">nm</td><td class="meta">9.45k</td><td class="meta">3.2w</td><td class="deps"><span class="badge">→override</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">strace</td><td class="meta">9.45k</td><td class="meta">3.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">taskmaster</td><td class="meta">9.45k</td><td class="meta">4.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">total-perspective-vortex</td><td class="meta">9.45k</td><td class="meta">19.4w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_linux</td><td class="meta">4.2k</td><td class="meta">10.6w</td><td class="deps"><span class="badge">→little-penguin-1</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_script</td><td class="meta">4.2k</td><td class="meta">0.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_select</td><td class="meta">4.2k</td><td class="meta">0.9w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">humangl</td><td class="meta">4.2k</td><td class="meta">6.2w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">libasm</td><td class="meta">966</td><td class="meta">5.9w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-</tbody></table>
-<div style="background:#14141f;padding:3px 8px;font-size:10px;color:#505060;border-top:1px solid #1a1a2e">
-Option 1 — SI/Réseaux: 33 projects • 573.616k XP • 63k req • min 33 projects</div>
+<h2>📊 Projets RNCP 7 (63k XP requis)</h2>
+<div class="summary">
+<div class="card"><div class="v">35</div><div class="l">Option 1 — SI/Réseaux</div></div>
+<div class="card"><div class="v">33</div><div class="l">Option 2 — Data</div></div>
 </div>
-<div class="projs" style="margin-bottom:8px">
-<table><thead><tr>
-<th style="min-width:120px">Project</th>
-<th style="width:60px">XP</th>
-<th style="width:50px">Dur</th>
-<th>Deps (bricoles)</th>
-<th>Type</th>
-</tr></thead><tbody>
-<tr><td class="name">override</td><td class="meta">35.7k</td><td class="meta">3.0w</td><td class="deps"><span class="badge">nm</span><span class="badge">→woody-woodpacker</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">Inception-of-Things</td><td class="meta">25.45k</td><td class="meta">6.2w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">rainfall</td><td class="meta">25.2k</td><td class="meta">4.5w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">BADASS</td><td class="meta">22.45k</td><td class="meta"></td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ActiveConnect</td><td class="meta">15.75k</td><td class="meta"></td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ActiveTechTales</td><td class="meta">15.75k</td><td class="meta"></td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_shield</td><td class="meta">15.75k</td><td class="meta">4.1w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">pestilence</td><td class="meta">15.75k</td><td class="meta">5.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">UnleashTheBox</td><td class="meta">15.75k</td><td class="meta">14.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ActiveDiscovery</td><td class="meta">15.75k</td><td class="meta">5.3w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_nmap</td><td class="meta">15.75k</td><td class="meta">6.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">boot2root</td><td class="meta">11.5k</td><td class="meta">2.9w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">famine</td><td class="meta">9.45k</td><td class="meta">5.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_ssl_md5</td><td class="meta">9.45k</td><td class="meta">4.8w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">MicroForensX</td><td class="meta">9.45k</td><td class="meta">4.3w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">snow-crash</td><td class="meta">9.45k</td><td class="meta">3.7w</td><td class="deps"><span class="badge">→darkly</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">woody-woodpacker</td><td class="meta">9.45k</td><td class="meta">4.7w</td><td class="deps"><span class="badge">override</span><span class="badge">nm</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">AccessibleDirectory</td><td class="meta">9.45k</td><td class="meta"></td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">AdministrativeDirectory</td><td class="meta">9.45k</td><td class="meta"></td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">AutomaticDirectory</td><td class="meta">9.45k</td><td class="meta"></td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">cloud-1</td><td class="meta">9.45k</td><td class="meta">6.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">taskmaster</td><td class="meta">9.45k</td><td class="meta">4.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">h42n42</td><td class="meta">9.45k</td><td class="meta">16.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_turing</td><td class="meta">9.45k</td><td class="meta">4.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">darkly</td><td class="meta">6.3k</td><td class="meta">4.4w</td><td class="deps"><span class="badge">snow-crash</span></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_malcolm</td><td class="meta">6k</td><td class="meta">10.0w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">dslr</td><td class="meta">6k</td><td class="meta">5.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_ping</td><td class="meta">4.2k</td><td class="meta">9.1w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">ft_traceroute</td><td class="meta">4.2k</td><td class="meta">3.7w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">avaj-launcher</td><td class="meta">4.2k</td><td class="meta">6.6w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
-<tr><td class="name">Cybersecurity</td><td class="meta">0</td><td class="meta">14.4w</td><td class="deps"></td><td><span class="tag tag-norm">cursus</span></td></tr>
+<table>
+<thead><tr><th class="col-name">Project</th><th style="width:60px">SI/Réseaux</th><th style="width:60px">Data</th><th style="width:60px">XP</th></tr></thead>
+<tbody>
+<tr><td class="first-col">42sh</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">BADASS</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">22.45k</td></tr>
+<tr><td class="first-col">doom-nukem</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP6 - 1 an</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">90k</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP6 - 2 ans</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">150k</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP7 - 1 an</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">90k</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP7 - 2 ans</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">180k</td></tr>
+<tr><td class="first-col">ft_linux</td><td class="yes">✓</td><td class="no">—</td><td class="meta">4.2k</td></tr>
+<tr><td class="first-col">ft_script</td><td class="yes">✓</td><td class="no">—</td><td class="meta">4.2k</td></tr>
+<tr><td class="first-col">ft_select</td><td class="yes">✓</td><td class="no">—</td><td class="meta">4.2k</td></tr>
+<tr><td class="first-col">gbmu</td><td class="yes">✓</td><td class="no">—</td><td class="meta">31.5k</td></tr>
+<tr><td class="first-col">humangl</td><td class="yes">✓</td><td class="no">—</td><td class="meta">4.2k</td></tr>
+<tr><td class="first-col">Inception-of-Things</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">25.45k</td></tr>
+<tr><td class="first-col">Internship I</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">42k</td></tr>
+<tr><td class="first-col">Internship II</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">63k</td></tr>
+<tr><td class="first-col">kfs-1</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">kfs-2</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">kfs-3</td><td class="yes">✓</td><td class="no">—</td><td class="meta">35.7k</td></tr>
+<tr><td class="first-col">kfs-4</td><td class="yes">✓</td><td class="no">—</td><td class="meta">25.2k</td></tr>
+<tr><td class="first-col">kfs-5</td><td class="yes">✓</td><td class="no">—</td><td class="meta">35.7k</td></tr>
+<tr><td class="first-col">kfs-6</td><td class="yes">✓</td><td class="no">—</td><td class="meta">25.2k</td></tr>
+<tr><td class="first-col">kfs-7</td><td class="yes">✓</td><td class="no">—</td><td class="meta">35.7k</td></tr>
+<tr><td class="first-col">kfs-8</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">kfs-9</td><td class="yes">✓</td><td class="no">—</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">kfs-x</td><td class="yes">✓</td><td class="no">—</td><td class="meta">35.7k</td></tr>
+<tr><td class="first-col">lem-ipc</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">libasm</td><td class="yes">✓</td><td class="no">—</td><td class="meta">0.966k</td></tr>
+<tr><td class="first-col">little-penguin-1</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">malloc</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">matt-daemon</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">nm</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">override</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">35.7k</td></tr>
+<tr><td class="first-col">Part_Time I</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">42k</td></tr>
+<tr><td class="first-col">Part_Time II</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">63k</td></tr>
+<tr><td class="first-col">pestilence</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">15.75k</td></tr>
+<tr><td class="first-col">rt</td><td class="yes">✓</td><td class="no">—</td><td class="meta">20.75k</td></tr>
+<tr><td class="first-col">Startup Internship</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">42k</td></tr>
+<tr><td class="first-col">strace</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">taskmaster</td><td class="yes">✓</td><td class="no">✓</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">total-perspective-vortex</td><td class="yes">✓</td><td class="no">—</td><td class="meta">9.45k</td></tr>
+<tr><td class="first-col">zappy</td><td class="yes">✓</td><td class="no">—</td><td class="meta">25.2k</td></tr>
 </tbody></table>
-<div style="background:#14141f;padding:3px 8px;font-size:10px;color:#505060;border-top:1px solid #1a1a2e">
-Option 2 — Data: 31 projects • 374.85k XP • 63k req • min 31 projects</div>
-</div>
 </section>
-<script>
-function showTrack(i) {
-  document.querySelectorAll('section[id^="track-"]').forEach((s,idx) => {
-    s.style.display = idx === i ? '' : 'none';
-  });
-  document.querySelectorAll('.tabs button').forEach((b,idx) => {
-    b.classList.toggle('active', idx === i);
-  });
-}
-</script>
+
+<!-- Comparaison View -->
+<section id="track-2" style="display:none">
+<h2>🔄 Comparaison : Meilleure vs 2e Meilleure</h2>
+<div class="summary">
+<div class="card"><div class="v">1488k</div><div class="l">Web/Mobile + SI/Réseaux</div></div>
+<div class="card"><div class="v">1476k</div><div class="l">Applicatif + SI/Réseaux</div></div>
+<div class="card"><div class="v">43</div><div class="l">Projets en commun</div></div>
+</div>
+<table>
+<thead><tr>
+<th class="col-name" style="width:200px">Nom du projet</th>
+<th style="width:80px">Meilleure</th>
+<th style="width:80px">2e Meilleure</th>
+</tr></thead>
+<tbody>
+<tr class="group-header"><td colspan="3">🔗 PROJETS EN COMMUN</td></tr>
+<tr><td class="first-col">42sh</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">BADASS</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">darkly</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">doom-nukem</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP6 - 1 an</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP6 - 2 ans</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP7 - 1 an</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">FR - Alternance - RNCP7 - 2 ans</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">ft_linux</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">ft_script</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">ft_select</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">gbmu</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">h42n42</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">humangl</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">Inception-of-Things</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">Internship I</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">Internship II</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">kfs-1</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">kfs-2</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">kfs-3</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">kfs-4</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">kfs-5</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">kfs-6</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">kfs-7</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">kfs-8</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">kfs-9</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">kfs-x</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">lem-ipc</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">libasm</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">little-penguin-1</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">malloc</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">matt-daemon</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">nm</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">override</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">Part_Time I</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">Part_Time II</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">pestilence</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">rt</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">Startup Internship</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">strace</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">taskmaster</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">total-perspective-vortex</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">zappy</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+<tr class="group-header"><td colspan="3">🎯 UNIQUES À LA MEILLEURE</td></tr>
+<tr><td class="first-col">avaj-launcher</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">bomberman</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">camagru</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">fix-me</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">ft_hangouts</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">hypertube</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">matcha</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">Mobile</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">nibbler</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">Piscine Django</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">Piscine Object</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">Piscine PHP Symfony</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">Piscine Ruby on Rails</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">red-tetris</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">swifty-companion</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">swifty-proteins</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr><td class="first-col">swingy</td><td class="yes">✓</td><td class="no">—</td></tr>
+<tr class="group-header"><td colspan="3">🥈 UNIQUES À LA 2e MEILLEURE</td></tr>
+<tr><td class="first-col">boot2root</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">dslr</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">famine</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">ft_ality</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">ft_malcolm</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">ft_nmap</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">ft_ping</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">ft_shield</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">ft_ssl_md5</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">ft_traceroute</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">ft_turing</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">Piscine ocaml</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">rainfall</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">snow-crash</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr><td class="first-col">woody-woodpacker</td><td class="no">—</td><td class="yes">✓</td></tr>
+<tr class="group-header"><td colspan="3">📋 AUTRES PROJETS</td></tr>
+<tr><td class="first-col">AccessibleDirectory</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td class="first-col">ActiveConnect</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td class="first-col">ActiveDiscovery</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td class="first-col">ActiveTechTales</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td class="first-col">AdministrativeDirectory</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td class="first-col">AutomaticDirectory</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td class="first-col">cloud-1</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td class="first-col">Cybersecurity</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td class="first-col">MicroForensX</td><td class="no">—</td><td class="no">—</td></tr>
+<tr><td class="first-col">UnleashTheBox</td><td class="no">—</td><td class="no">—</td></tr>
+
+<tr class="total"><td class="first-col">📊 TOTAUX: 60 projets • 1488k XP | 58 projets • 1476k XP | 4 combinaisons</td><td colspan="2"></td></tr>
+</tbody></table>
+</section>
 </body></html>
