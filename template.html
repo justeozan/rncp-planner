@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RNCP 42 — Optimiseur</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f; --panel:#101017; --head:#15151e; --line:#1d1d28; --line2:#2b2b3b;
+  --fg:#d6d6e6; --dim:#70708c; --dim2:#484860;
+  --acc:#4a9eff; --ok:#3ecf8e; --warn:#ffb454; --bad:#ff5f6d; --mag:#c678dd;
+}
+html,body{height:100%}
+body{
+  font:11px/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  background:var(--bg);color:var(--fg);overflow:hidden;
+  display:flex;flex-direction:column;padding:5px;gap:4px
+}
+.dim{color:var(--dim)}
+
+header{display:flex;align-items:center;gap:8px;flex:0 0 auto;padding:0 2px}
+header h1{font-size:12px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
+header h1 i{color:var(--acc);font-style:normal}
+.seg{display:flex;border:1px solid var(--line2);border-radius:3px;overflow:hidden}
+.seg button{background:transparent;color:var(--dim);border:0;padding:2px 8px;
+  font:inherit;cursor:pointer;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line2)}
+.seg button:hover{color:var(--fg);background:#1a1a24}
+.seg button.on{background:var(--acc);color:#06060a;font-weight:600}
+.seg.ch button.on{background:#24405e;color:#cfe3ff}
+.seg.ch button{padding:2px 7px;font-size:10px}
+.seg.ch button::before{content:"○ ";color:var(--dim2)}
+.seg.ch button.on::before{content:"● ";color:var(--acc)}
+header .lbl{color:var(--dim2);font-size:10px;white-space:nowrap}
+header .sp{margin-left:auto;display:flex;gap:10px;color:var(--dim2);white-space:nowrap}
+
+main{flex:1 1 auto;display:grid;grid-template-columns:322px 1fr;gap:4px;min-height:0}
+section{background:var(--panel);border:1px solid var(--line);border-radius:4px;
+  display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.col{display:flex;flex-direction:column;gap:4px;min-height:0}
+.hd{flex:0 0 auto;display:flex;align-items:baseline;gap:7px;padding:3px 7px;
+  border-bottom:1px solid var(--line);background:var(--head)}
+.hd .t{font-weight:600;letter-spacing:.5px;color:#9c9cb8;font-size:9.5px;text-transform:uppercase}
+.hd .r{margin-left:auto;color:var(--dim2);font-size:9.5px;text-align:right}
+.bd{flex:1 1 auto;min-height:0;overflow:auto}
+
+table{border-collapse:collapse;width:100%}
+th{font-size:9px;font-weight:500;color:var(--dim2);text-transform:uppercase;letter-spacing:.4px;
+  padding:2px 5px;text-align:right;border-bottom:1px solid var(--line);
+  position:sticky;top:0;background:var(--head);z-index:1}
+th.l{text-align:left}
+td{padding:1px 5px;text-align:right;white-space:nowrap;border-bottom:1px solid #14141c}
+td.l{text-align:left;overflow:hidden;text-overflow:ellipsis}
+tbody tr:last-child td{border-bottom:0}
+
+#combos tbody tr{cursor:pointer}
+#combos tbody tr:hover{background:#191925}
+#combos tbody tr.on{background:#1b2740;box-shadow:inset 2px 0 0 var(--acc)}
+#combos tbody tr.on td{color:#fff}
+#combos .grp td{color:var(--dim2);font-size:9px;letter-spacing:.6px;text-transform:uppercase;
+  padding-top:4px;cursor:default}
+#combos .grp:hover{background:transparent}
+#combos .ix{color:var(--dim2);width:20px}
+#combos tr.on .ix{color:var(--acc)}
+.best{color:var(--ok)}
+.x{color:var(--dim)}
+.un{color:var(--warn)}
+
+.chips{display:flex;flex-wrap:wrap;gap:3px;padding:4px 5px}
+.chip{border:1px solid var(--line2);border-radius:3px;padding:0 4px;display:flex;gap:4px;
+  align-items:baseline;font-size:10px}
+.chip .k{color:var(--dim)}
+.chip.ok{border-color:#1d4535}.chip.ok .v{color:var(--ok)}
+.chip.ko{border-color:#4a1e24}.chip.ko .v{color:var(--bad)}
+.chip.na{border-color:var(--line)}.chip.na .v{color:var(--warn)}
+
+.mxwrap{display:flex;gap:9px;align-items:flex-start;height:100%}
+.mxwrap table{flex:1 1 0;min-width:0;table-layout:fixed}
+.mxt td{border-bottom:1px solid #13131b;line-height:1.2;font-size:var(--rf,11px);
+  padding-top:var(--rp,1px);padding-bottom:var(--rp,1px)}
+.mxt tbody tr:nth-child(even){background:#0c0c13}
+.mxt tbody tr:nth-child(even):hover,.mxt tbody tr:hover{background:#191925}
+.mxt .nm{width:auto;position:relative;background-image:linear-gradient(90deg,
+  #182742 var(--w,0%), transparent var(--w,0%));background-size:100% 70%;
+  background-position:0 50%;background-repeat:no-repeat}
+.mxt .w{white-space:nowrap}
+.mxt .wc{width:42px}.mxt .wx{width:46px}.mxt .wd{width:34px}.mxt .wn{width:30px}
+.mxt .cat{color:var(--dim2);letter-spacing:1px;font-size:calc(var(--rf,11px) - 1px)}
+.mxt .xp{color:var(--acc)}
+.mxt .dy{color:var(--dim)}
+.mxt .cnt{color:var(--dim2)}
+.mxt .c{width:var(--cw,42px);text-align:center;color:#24243a;
+  padding-left:0;padding-right:0;box-shadow:inset -1px 0 0 #17171f}
+.mxt .c.gb{box-shadow:inset -1px 0 0 var(--line2)}
+.mxt .c.c0{border-left:1px solid var(--line2)}
+.mxt .c.y{color:var(--fg)}
+.mxt .c.sel{background:#16203a}
+.mxt th.c{cursor:pointer}
+.mxt th.c:hover{color:var(--fg)}
+.mxt th.c.sel{background:#1b2740;color:var(--acc)}
+.mxt .c.y.sel{color:var(--acc)}
+.mxt tr.nr .nm{color:var(--ok)}
+.mxt .tg{color:var(--dim2);letter-spacing:.2px;font-size:calc(var(--rf,11px) - 1.5px)}
+.mxt .tg .exp{color:var(--mag)}
+.mxt .tg .suite{color:var(--warn)}
+.mxt .tg .risk{color:var(--bad)}
+.mxt .tg .chn{color:var(--acc)}
+.mxt .tg .sub{color:var(--dim)}
+
+#titles{font-size:10px}
+#titles .ti{padding:2px 6px;border-bottom:1px solid #15151e;line-height:1.22}
+#titles .ti:last-child{border-bottom:0}
+#titles .k{color:var(--acc);font-weight:600}
+#titles .nm{color:var(--fg)}
+#titles .lv{color:var(--dim2)}
+#titles .op{color:var(--dim)}
+#titles .op b{color:#9c9cb8;font-weight:600}
+
+footer{flex:0 0 auto;display:flex;gap:13px;align-items:baseline;flex-wrap:wrap;
+  color:var(--dim2);font-size:9.5px;padding:0 3px;line-height:1.25}
+footer b{color:var(--dim);font-weight:600}
+@media (max-width:950px){main{grid-template-columns:1fr;grid-template-rows:auto 1fr}body{overflow:auto}}
+</style>
+</head><body>
+
+<header>
+  <h1><i>◆</i> RNCP 42</h1>
+  <div class="seg" id="obj">
+    <button data-o="projects" class="on">min projets</button>
+    <button data-o="days">min temps</button>
+  </div>
+  <span class="lbl">prerequis</span><div class="seg ch" id="chains"></div>
+  <div class="sp" id="meta"></div>
+</header>
+
+<main>
+  <div class="col">
+    <section style="flex:0 0 auto">
+      <div class="hd"><span class="t">Combinaisons</span><span class="r" id="cmpNote"></span></div>
+      <div class="bd">
+        <table id="combos">
+          <thead><tr><th class="l" colspan="2">titre(s)</th><th>proj</th><th>jours</th>
+            <th>XP</th><th>alt.</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+    <section style="flex:0 0 auto">
+      <div class="hd"><span class="t">Conditions</span><span class="r" id="condFor"></span></div>
+      <div class="bd"><div class="chips" id="checks"></div></div>
+    </section>
+    <section style="flex:1 1 auto">
+      <div class="hd"><span class="t">Les 4 titres</span>
+        <span class="r">categorie : XP min / nb projets min</span></div>
+      <div class="bd"><div id="titles"></div></div>
+    </section>
+  </div>
+
+  <section>
+    <div class="hd"><span class="t" id="mxTitle">Projets x combinaisons</span>
+      <span class="r" id="mxNote"></span></div>
+    <div class="bd"><div id="mxWrap" class="mxwrap"></div></div>
+  </section>
+</main>
+
+<footer id="foot"></footer>
+
+<script>
+const D = /*__DATA__*/;
+const P = D.projects, T = D.titles, CH = D.chains;
+let mask = D.full_mask, obj = "projects", sel = null, IX = {};
+
+const k = v => v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1).replace(".0", "") + "k" : "" + v;
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c;
+  if (x != null) e.textContent = x; return e; };
+const other = o => o === "projects" ? "days" : "projects";
+const V = () => D.variants[String(mask)] || D.variants[String(D.full_mask)];
+const SHORT = {"Object Oriented Programming":"OOP","Functional programming":"Fonctionnel",
+  "Imperative programming":"Imperatif","System administration":"SysAdmin",
+  "Artificial Intelligence":"IA","Web - Database":"Web-DB","Unix/Kernel":"Unix/Kernel",
+  "Security":"Securite"};
+const GROUPS = [["un seul titre","single"],["deux titres","pair"],
+                ["trois titres","triple"],["les quatre","quad"]];
+
+function bestOf(kinds){
+  const L = V(); let b = null;
+  for (const key of Object.keys(L)){
+    const r = L[key]; if (!kinds.includes(r.kind) || !r[obj].feasible) continue;
+    const v = obj === "projects" ? [r[obj].n, r[obj].days] : [r[obj].days, r[obj].n];
+    if (!b || v[0] < b.v[0] || (v[0] === b.v[0] && v[1] < b.v[1])) b = { key, v };
+  }
+  return b && b.key;
+}
+
+/* les combinaisons les moins cheres d'abord, groupees par nombre de titres */
+function ordered(){
+  const L = V(), out = [];
+  for (const [label, kind] of GROUPS){
+    const g = Object.keys(L).filter(x => L[x].kind === kind).sort((a, b) => {
+      const A = L[a][obj], B = L[b][obj];
+      return obj === "projects" ? (A.n - B.n) || (A.days - B.days)
+                                : (A.days - B.days) || (A.n - B.n);
+    });
+    if (g.length) out.push({ label, keys: g });
+  }
+  return out;
+}
+
+function renderChains(){
+  const box = document.getElementById("chains"); box.textContent = "";
+  CH.forEach((c, i) => {
+    const on = (mask >> i) & 1;
+    const b = el("button", on ? "on" : "", c.id + (c.confidence === "certain" ? "" : " ?"));
+    b.title = `${c.label}\n${c.n} projets enchaines · ${c.confidence}\n${c.note}\n\n`
+      + (on ? "actif : prendre le k-ieme projet force les k-1 precedents"
+            : "ignore : ces projets sont traites comme independants");
+    b.onclick = () => {
+      if (D.only_full) return;
+      mask ^= (1 << i); render();
+    };
+    if (D.only_full) b.style.cursor = "default";
+    box.appendChild(b);
+  });
+}
+
+function renderCombos(){
+  const L = V(), tb = document.querySelector("#combos tbody");
+  tb.textContent = "";
+  const best = {};
+  for (const [, kind] of GROUPS) best[bestOf([kind])] = 1;
+  let i = 0; IX = {};
+  for (const grp of ordered()){
+    const tr = el("tr","grp"), td = el("td", null, grp.label); td.colSpan = 6;
+    tr.appendChild(td); tb.appendChild(tr);
+    for (const key of grp.keys){
+      const r = L[key], m = r[obj], alt = r[other(obj)];
+      IX[key] = ++i;
+      const row = el("tr", key === sel ? "on" : "");
+      row.onclick = () => { sel = key; render(); };
+      row.appendChild(el("td","ix", i));
+      const nm = el("td","l", key);
+      if (best[key]) nm.classList.add("best");
+      row.appendChild(nm);
+      if (!m.feasible){
+        const td2 = el("td","un","impossible"); td2.colSpan = 4; row.appendChild(td2);
+      } else {
+        row.appendChild(el("td", null, m.n + (m.proven ? "" : "~")));
+        row.appendChild(el("td", null, m.days));
+        row.appendChild(el("td","x", k(m.xp)));
+        row.appendChild(el("td","x", alt.feasible
+          ? (obj === "projects" ? alt.days + "j" : alt.n + "p") : "—"));
+      }
+      row.title = r.combo.map(c => `${c} — ${T[c].name}\n   niveau ${T[c].level} · `
+        + T[c].options.map(o => `${o.t} ${k(o.xp)}XP/${o.n}proj`).join(" · ")).join("\n");
+      tb.appendChild(row);
+    }
+  }
+  document.getElementById("cmpNote").textContent = obj === "projects"
+    ? "trie par nb de projets · alt. = jours en mode temps"
+    : "trie par duree · alt. = nb de projets en mode projets";
+}
+
+function renderChecks(){
+  const r = V()[sel], m = r[obj];
+  document.getElementById("condFor").textContent = r.combo.map(c => T[c].name).join(" + ");
+  const ch = document.getElementById("checks"); ch.textContent = "";
+  for (const c of m.checks){
+    const d = el("div", "chip " + (c.ok === null ? "na" : c.ok ? "ok" : "ko"));
+    d.appendChild(el("span","k", c.l));
+    d.appendChild(el("span","v",
+      (c.h === null ? "?" : c.u === "xp" ? k(c.h) : c.h) + "/" + (c.u === "xp" ? k(c.n) : c.n)));
+    ch.appendChild(d);
+  }
+}
+
+function renderMatrix(){
+  const L = V(), groups = ordered();
+  const cols = groups.flatMap(g => g.keys);
+  const bounds = new Set(); let acc = 0;
+  for (const g of groups){ acc += g.keys.length; bounds.add(acc - 1); }
+  const cls = i => "c" + (i === 0 ? " c0" : "") + (bounds.has(i) ? " gb" : "");
+  const sets = {}; for (const key of cols) sets[key] = new Set(L[key][obj].ids);
+
+  const count = new Map();
+  for (const key of cols) for (const id of sets[key]) count.set(id, (count.get(id) || 0) + 1);
+  const maxXp = Math.max(...[...count.keys()].map(id => P[id].xp), 1);
+  const rows = [...count.keys()].sort((a, b) =>
+    (count.get(b) - count.get(a)) || (P[b].xp - P[a].xp) || P[a].d - P[b].d);
+
+  /* Tout doit tenir sans defilement : si les lignes ne rentrent pas a taille
+     lisible, la matrice se repartit en plusieurs blocs cote a cote. */
+  const wrap = document.getElementById("mxWrap"), bd = wrap.closest(".bd");
+  const perBlockW = 250 + cols.length * 22;
+  const maxBlocks = Math.max(1, Math.floor(bd.clientWidth / perBlockW));
+  const fit11 = Math.max(1, Math.floor((bd.clientHeight - 16) / 15));
+  const blocks = Math.max(1, Math.min(maxBlocks, Math.ceil(rows.length / fit11)));
+  const per = Math.ceil(rows.length / blocks);
+  const blockW = (bd.clientWidth - (blocks - 1) * 9) / blocks;
+  document.documentElement.style.setProperty("--cw",
+    Math.max(15, Math.min(42, (blockW - 152 - 130) / cols.length)).toFixed(1) + "px");
+
+  wrap.textContent = "";
+  for (let b = 0; b < blocks; b++){
+    const tbl = el("table","mxt"), thead = el("thead"), hr = el("tr");
+    for (const [c, t] of [["l nm","projet"],["w wc","cat."],["w wx","XP"],["w wd","j"],
+                          ["w wn","/" + cols.length]])
+      hr.appendChild(el("th", c, t));
+    cols.forEach((key, i) => {
+      const th = el("th", cls(i) + (key === sel ? " sel" : ""), String(IX[key]));
+      th.onclick = () => { sel = key; render(); };
+      th.title = key;
+      hr.appendChild(th);
+    });
+    thead.appendChild(hr); tbl.appendChild(thead);
+    const tb = el("tbody");
+    for (const id of rows.slice(b * per, (b + 1) * per)){
+      const p = P[id], n = count.get(id);
+      const tr = el("tr", n === cols.length ? "nr" : "");
+      const nm = el("td","l nm");
+      nm.style.setProperty("--w", (6 + 94 * p.xp / maxXp).toFixed(1) + "%");
+      nm.appendChild(document.createTextNode(p.n));
+      const tg = el("span","tg");
+      if (p.sub) tg.appendChild(el("span","sub", ` +${p.sub} modules`));
+      if (p.ch && (mask >> CH.findIndex(c => c.id === p.ch[0])) & 1)
+        tg.appendChild(el("span","chn", ` ${p.ch[0]} ${p.ch[1]}/${p.ch[2]}`));
+      for (const t of p.t)
+        tg.appendChild(el("span", t === "0 validation" ? "risk" : t, " " + t));
+      if (tg.childNodes.length) nm.appendChild(tg);
+      tr.appendChild(nm);
+      tr.appendChild(el("td","w wc cat", (p.c || []).join("")));
+      tr.appendChild(el("td","w wx xp", k(p.xp)));
+      tr.appendChild(el("td","w wd dy", p.d));
+      tr.appendChild(el("td","w wn cnt", n));
+      cols.forEach((key, i) =>
+        tr.appendChild(el("td", cls(i) + (sets[key].has(+id) ? " y" : "")
+          + (key === sel ? " sel" : ""), sets[key].has(+id) ? "●" : "·")));
+      tr.title = `${p.n}\n${p.xp} XP · ${p.d} j (duree ${p.s})\ndans ${n}/${cols.length} plans`
+        + ((p.c || []).length ? "\ncategories : "
+           + p.c.map(x => (D.meta.cats || {})[x] || x).join(", ") : "")
+        + (p.ch ? `\nmaillon ${p.ch[1]} sur ${p.ch[2]} de la chaine ${p.ch[0]} :`
+                + ` exige les ${p.ch[1] - 1} precedents` : "");
+      tb.appendChild(tr);
+    }
+    tbl.appendChild(tb); wrap.appendChild(tbl);
+  }
+
+  const m = L[sel][obj], nr = rows.filter(id => count.get(id) === cols.length).length;
+  document.getElementById("mxTitle").textContent =
+    `${sel} — ${m.n} projets` + (m.n_raw > m.n ? ` (${m.n_raw} avec les modules)` : "")
+    + ` · ${m.days} j · ${k(m.xp)} XP` + (m.proven ? "" : " (majorant)");
+  document.getElementById("mxNote").textContent =
+    `${rows.length} projets cites · ${nr} dans les ${cols.length} plans`
+    + ` · colonne = n° de la combinaison a gauche`;
+}
+
+/* Remplit la hauteur disponible sans la depasser : on etale les lignes quand il
+   y a de la place, on reduit la police quand il y a trop de projets. */
+function fitRows(){
+  const first = document.querySelector(".mxt");
+  if (!first) return;
+  const bd = first.closest(".bd");
+  const n = Math.max(...[...document.querySelectorAll(".mxt tbody")].map(t => t.children.length));
+  if (!n) return;
+  const LH = 1.2, head = first.querySelector("thead").offsetHeight;
+  const h = (bd.clientHeight - head - 1) / n;
+  const font = Math.max(8.5, Math.min(11, (h - 1) / LH));
+  const r = document.documentElement.style;
+  r.setProperty("--rf", font.toFixed(2) + "px");
+  r.setProperty("--rp", Math.max(0, (h - (font * LH + 1)) / 2).toFixed(2) + "px");
+}
+
+function renderTitles(){
+  const box = document.getElementById("titles"); box.textContent = "";
+  for (const [key, t] of Object.entries(T)){
+    const d = el("div","ti");
+    d.appendChild(el("span","k", key + " "));
+    d.appendChild(el("span","nm", t.name));
+    d.appendChild(el("span","lv", `  niv ${t.level} · ${k(t.level_xp)} XP · `
+      + `${t.exp} exp · ${t.suite} suite · ${t.events} ev`));
+    const ops = el("div","op");
+    t.options.forEach((o, i) => {
+      if (i) ops.appendChild(document.createTextNode(" · "));
+      ops.appendChild(el("b", null, SHORT[o.t] || o.t));
+      ops.appendChild(document.createTextNode(` ${k(o.xp)}/${o.n}`));
+    });
+    d.appendChild(ops);
+    box.appendChild(d);
+  }
+}
+
+function renderMeta(){
+  const M = D.meta, B = D.baseline;
+  const s = document.getElementById("meta"); s.textContent = "";
+  const bits = [`depart niveau ${B.level} · ${k(B.xp)} XP`];
+  if (B.done.length) bits.push("deja fait : " + B.done.map(d => d.n).join(", "));
+  bits.push(`${M.rate} j/1000 XP`, M.generated);
+  for (const t of bits) s.appendChild(el("span", null, t));
+
+  const f = document.getElementById("foot"); f.textContent = "";
+  const add = (b, t) => { const w = el("span"); w.appendChild(el("b", null, b));
+    w.appendChild(document.createTextNode(" " + t)); f.appendChild(w); };
+  add("lecture", "● dans ce plan, · absent · ligne verte = present dans les "
+    + Object.keys(V()).length + " plans · barre bleue = XP relative");
+  add("cat.", Object.entries(M.cats || {}).map(([c, n]) => c + "=" + n).join(" "));
+  add("prerequis", "un projet marque « kfs 4/10 » traine les 3 precedents : "
+    + "leur temps et leur nombre sont comptes dans le plan");
+  add("piscines", "une piscine = 1 projet (l'intra la compte ainsi dans les listes RNCP) ; "
+    + "ses modules sont dedans, son XP est leur somme");
+  add("conditions", "niveau de cursus · XP + nb de projets par categorie · "
+    + "2 experiences pro · 1 projet suite · events en plus (non optimisables)");
+  add("temps", `estime : duree intra bornee autour de ${M.rate} j/1000 XP, cumulee`);
+  add("~", "nombre non prouve minimal dans le budget de calcul (c'est un majorant)");
+}
+
+function render(){
+  const L = V();
+  if (!sel || !L[sel]) sel = ordered()[0].keys[0];
+  renderChains(); renderCombos(); renderChecks(); renderTitles();
+  renderMatrix(); renderMeta();
+  requestAnimationFrame(fitRows);
+}
+
+document.querySelectorAll("#obj button").forEach(b => b.onclick = () => {
+  obj = b.dataset.o;
+  document.querySelectorAll("#obj button").forEach(x => x.classList.toggle("on", x === b));
+  render();
+});
+addEventListener("resize", () => requestAnimationFrame(fitRows));
+render();
+</script>
+</body></html>
