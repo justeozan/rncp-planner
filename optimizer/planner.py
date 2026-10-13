@@ -29,7 +29,7 @@ import os
 import statistics
 from itertools import combinations
 
-DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+DATA = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data"))
 DAY = 86400.0
 INF = float("inf")
 
