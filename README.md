@@ -10,8 +10,10 @@ the RNCP progress page. What this fork adds:
 * **`/planner`**: for each of the 15 combinations of the four titles
   (`rncp6-1`, `rncp6-2`, `rncp7-1`, `rncp7-2`), the shortest list of projects
   that satisfies every condition, either by fewest projects or by shortest time.
-  The page is public (no 42 account needed). The model and the solver are
-  described in [`optimizer/README.md`](optimizer/README.md).
+  The page is public (no 42 account needed) and also published on its own, as
+  a static page, on GitHub Pages: https://justeozan.github.io/rncp-planner/.
+  The model and the solver are described in
+  [`optimizer/README.md`](optimizer/README.md).
 * **Up-to-date project list**: `data/projects_21.json` includes the 22 projects
   missing since September 2026
   ([42calculator#70](https://github.com/lucas-ht/42calculator/issues/70), data
@@ -49,6 +51,12 @@ cd optimizer
 python3 build.py --xp 167758 --done 1396,1405    # writes ../public/planner.html
 python3 test_planner.py                          # checks that plans are valid
 ```
+
+The committed page starts from a fixed state (level 13.91, two projects already
+validated), not from yours: regenerate it with your own `--xp` and `--done`.
+Pushing a new `public/planner.html` to `main` redeploys the GitHub Pages copy
+(`.github/workflows/pages.yaml`). Pages serves only that one page: the rest of
+the site needs a Node server (42 OAuth, Redis) and cannot run there.
 
 
 ## License

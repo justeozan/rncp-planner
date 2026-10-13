@@ -1,0 +1,49 @@
+name: Deploy planner to GitHub Pages
+
+# Publishes public/planner.html (the generated RNCP planner) as the home page of
+# https://<user>.github.io/<repo>/. Only that page: the rest of the site needs a
+# Node server (42 OAuth, Redis) and cannot run on GitHub Pages.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - public/planner.html
+      - .github/workflows/pages.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Assemble the site
+        run: |
+          if grep -qF '/*__DATA__*/' public/planner.html; then
+            echo "public/planner.html still has the data placeholder: run optimizer/build.py" >&2
+            exit 1
+          fi
+          mkdir _site
+          cp public/planner.html _site/index.html
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
