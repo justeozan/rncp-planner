@@ -15,9 +15,13 @@ the RNCP progress page. What this fork adds:
 * **Up-to-date project list**: `data/projects_21.json` includes the 22 projects
   missing since September 2026
   ([42calculator#70](https://github.com/lucas-ht/42calculator/issues/70), data
-  from [PR #69](https://github.com/lucas-ht/42calculator/pull/69)). 17 of them
-  have no XP on the intra yet, none is in an RNCP pool yet, and the 5 that have
-  XP have no validations yet. The optimizer output does not change.
+  from the still-open [PR #69](https://github.com/lucas-ht/42calculator/pull/69),
+  a snapshot of the intra from early September 2026). In that snapshot 17 of
+  them have an XP of 0, the 5 others have XP but 0 validations, and none is in
+  an RNCP pool yet, so they show up in the calculator's project list but change
+  nothing in the RNCP requirements or in the planner output. To refresh the
+  data from the intra, run `scripts/fetch_projects.py` with your own 42 API
+  key ([scripts/README.md](scripts/README.md)).
 * **`data/rules.json`**: hand-curated prerequisite chains, common core and
   excluded entries. Read by the optimizer only; the site ignores it.
 
