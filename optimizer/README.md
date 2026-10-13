@@ -11,8 +11,8 @@ conditions d'obtention.
 ```bash
 python3 planner.py --level 14                        # tableau comparatif
 python3 planner.py --combo rncp6-1+rncp7-2 -v        # le plan détaillé
-python3 build.py --xp 167758 --done 1396,1405        # régénère index.html
-open index.html
+python3 build.py --xp 167758 --done 1396,1405        # régénère public/planner.html
+# la page est servie par le site : npm run dev -> http://localhost:3000/planner
 ```
 
 Aucune dépendance : Python 3 standard, branch & bound écrit à la main.
@@ -125,7 +125,7 @@ python3 build.py --xp 187000 --done 1396,1405     # regénérer la page
 python3 build.py --level 17 --no-variants         # 1 seul réglage, bien plus rapide
 ```
 
-Les ids se lisent dans `data/projects_21.json`. `index.html` est généré pour un
+Les ids se lisent dans `data/projects_21.json`. `public/planner.html` est généré pour un
 état de départ précis : il porte le niveau et les projets déjà validés en
 en-tête, et se régénère en une commande.
 

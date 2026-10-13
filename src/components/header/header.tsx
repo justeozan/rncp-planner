@@ -24,7 +24,7 @@ export async function Header() {
             className="hidden md:flex"
           >
             <Link
-              href="https://github.com/lucas-ht/42calculator"
+              href="https://github.com/justeozan/rncp-planner"
               target="_blank"
               rel="noopener noreferrer"
             >

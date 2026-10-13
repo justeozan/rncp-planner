@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Genere index.html : page unique, tout visible, sans defilement.
+"""Genere public/planner.html : page unique, tout visible, sans defilement.
+
+La page est servie par le site Next.js (/planner, dans une iframe).
 
 Calcule, pour un etat de depart donne (XP actuels + projets deja valides), les
 15 combinaisons de titres RNCP, et cela pour chaque reglage des chaines de
@@ -163,7 +165,8 @@ def main():
                     help="ne calculer que le reglage ou toutes les chaines sont actives")
     ap.add_argument("--workers", type=int, default=os.cpu_count() or 4)
     ap.add_argument("--time-model", choices=("clamped", "xp", "raw"), default="clamped")
-    ap.add_argument("--out", default=os.path.join(HERE, "index.html"))
+    ap.add_argument("--out", default=os.path.normpath(
+        os.path.join(HERE, "..", "public", "planner.html")))
     args = ap.parse_args()
 
     ds = pl.Dataset(time_model=args.time_model)

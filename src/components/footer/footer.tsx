@@ -12,10 +12,16 @@ export function Footer() {
           </div>
         </Link>
         <Separator orientation="vertical" />
-        <Link href="https://github.com/lucas-ht/42calculator">
+        <Link href="https://github.com/justeozan/rncp-planner">
           <div className="inline-flex items-center text-muted-foreground transition-colors hover:text-foreground">
             <div className="truncate text-xs">Checkout the Code</div>
             <GitHub className="ml-2 h-4" />
+          </div>
+        </Link>
+        <Separator orientation="vertical" />
+        <Link href="https://github.com/lucas-ht/42calculator">
+          <div className="truncate text-muted-foreground text-xs transition-colors hover:text-foreground">
+            Fork of 42calculator (GPL-3.0)
           </div>
         </Link>
       </div>
