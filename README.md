@@ -41,6 +41,26 @@ docker compose up --build        # http://localhost:3000, planner at /planner
 Redis HTTP endpoint is reachable at `KV_REST_API_URL`.
 
 
+## Deploying on Vercel
+
+The whole site (sign-in, calculator, RNCP page, planner) runs on Vercel. The project
+needs these environment variables:
+
+| Variable | Value |
+|---|---|
+| `AUTH_SECRET` | any random string, e.g. `openssl rand -base64 32` |
+| `AUTH_42_SCHOOL_ID`, `AUTH_42_SCHOOL_SECRET` | from a [42 API application](https://profile.intra.42.fr/oauth/applications) whose redirect URI is `https://<your-domain>/auth/callback/42` |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | a Redis added from the Vercel Marketplace (Upstash for Redis, free plan), which sets them for you |
+
+Vercel sets `VERCEL_ENV` itself. The "Developer sign in" button (a fake account with
+no 42 data) only shows on preview deployments, never in production. Sign in only from
+the domain registered in the 42 application: the callback URL is built from the host
+you browse.
+
+`vercel.json` pins the functions to `fra1` (Frankfurt); pick the same region for the
+Redis.
+
+
 ## Regenerating the planner
 
 `public/planner.html` is generated for a given starting XP and list of projects

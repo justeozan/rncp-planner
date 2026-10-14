@@ -1,0 +1,9 @@
+# A deploy from the command line uploads the working directory and does not apply
+# .gitignore, so local-only files have to be listed here too. Without this, the
+# first CLI deploy shipped the local dev .env inside the deployment.
+# Same rules as .gitignore.
+.env
+.env*.local
+next-env.d.ts
+*.tsbuildinfo
+.swc
