@@ -4,8 +4,9 @@ Fork of [lucas-ht/42calculator](https://github.com/lucas-ht/42calculator)
 (GPL-3.0, [42calculator.fr](https://42calculator.fr)) with an RNCP **path
 optimizer** added on top.
 
-The 42calculator site itself is unchanged: sign in with 42, the XP calculator,
-the RNCP progress page. What this fork adds:
+Every page is public: there is no sign-in and no account. The site keeps the XP
+calculator and the RNCP progress page of 42calculator (both start from an empty
+cursus: level 0, no project). What this fork adds:
 
 * **`/planner`**: for each of the 15 combinations of the four titles
   (`rncp6-1`, `rncp6-2`, `rncp7-1`, `rncp7-2`), the shortest list of projects
@@ -30,35 +31,20 @@ the RNCP progress page. What this fork adds:
 
 ## Running locally
 
-Same as upstream: see [docs/running.md](docs/running.md) (Docker, plus a 42 API
-key for "Sign in with 42").
+No 42 API key, Redis or environment variable is needed. See
+[docs/running.md](docs/running.md).
 
 ```bash
-docker compose up --build        # http://localhost:3000, planner at /planner
+docker compose up --build        # http://localhost:3000 (redirects to /planner)
+# or, without Docker:
+npm install && npm run dev
 ```
-
-`npm run dev` also works once `.env` is filled in (copy `.env.example`) and a
-Redis HTTP endpoint is reachable at `KV_REST_API_URL`.
 
 
 ## Deploying on Vercel
 
-The whole site (sign-in, calculator, RNCP page, planner) runs on Vercel. The project
-needs these environment variables:
-
-| Variable | Value |
-|---|---|
-| `AUTH_SECRET` | any random string, e.g. `openssl rand -base64 32` |
-| `AUTH_42_SCHOOL_ID`, `AUTH_42_SCHOOL_SECRET` | from a [42 API application](https://profile.intra.42.fr/oauth/applications) whose redirect URI is `https://<your-domain>/auth/callback/42` |
-| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | a Redis added from the Vercel Marketplace (Upstash for Redis, free plan), which sets them for you |
-
-Vercel sets `VERCEL_ENV` itself. The "Developer sign in" button (a fake account with
-no 42 data) only shows on preview deployments, never in production. Sign in only from
-the domain registered in the 42 application: the callback URL is built from the host
-you browse.
-
-`vercel.json` pins the functions to `fra1` (Frankfurt); pick the same region for the
-Redis.
+Import the repository on Vercel and deploy: nothing to configure (no environment
+variable, no Redis). `vercel.json` pins the functions to `fra1` (Frankfurt).
 
 
 ## Regenerating the planner
@@ -76,7 +62,7 @@ The committed page starts from a fixed state (level 13.91, two projects already
 validated), not from yours: regenerate it with your own `--xp` and `--done`.
 Pushing a new `public/planner.html` to `main` redeploys the GitHub Pages copy
 (`.github/workflows/pages.yaml`). Pages serves only that one page: the rest of
-the site needs a Node server (42 OAuth, Redis) and cannot run there.
+the rest of the site needs a Node server and cannot run there.
 
 
 ## License

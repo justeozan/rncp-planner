@@ -51,9 +51,10 @@ def _dataset(off):
 
 
 def _job(task):
-    mask, off, combo, obj, base_xp, done, budget = task
+    mask, off, combo, obj, base_xp, done, budget, *rest = task
+    banned = frozenset(rest[0]) if rest else frozenset()
     ds = _dataset(off)
-    p = pl.solve_combo(ds, combo, base_xp, set(done), obj, budget)
+    p = pl.solve_combo(ds, combo, base_xp, set(done), obj, budget, banned)
     return (mask, "+".join(combo), obj, {
         "feasible": p["feasible"], "n": p["n"], "units": p["units_n"],
         "days": round(p["days"]), "xp": p["xp"], "proven": p["proven"],
@@ -106,7 +107,103 @@ def collect(chains, base_xp, done, args):
                 fixed += 1
     if fixed:
         print(f"  ({fixed} plans 'min temps' remplaces par le plan 'min projets')")
+    if args.alternatives:
+        full = str((1 << len(chains)) - 1)
+        alternatives(variants[full], (),
+                     base_xp, done, args)
     return variants
+
+
+def _banned_for(ds, rows):
+    out = set()
+    for r in rows:
+        out |= set(ds.bundles.get(r, (r,)))
+    return tuple(sorted(out))
+
+
+def alternatives(combos, off, base_xp, done, args):
+    """Autres plans valides pour chaque combinaison : on interdit tour a tour
+    un projet des meilleurs plans et on relance la recherche (deux niveaux).
+    Les plans distincts sont gardes dans `alts` ; l'interface les trie selon
+    le mode (jours ou nombre de projets)."""
+    ds = pl.Dataset(time_model=args.time_model)
+    found = {}   # key -> {frozenset(ids): plan}
+    for key, row in combos.items():
+        found[key] = {}
+        for obj in ("projects", "days"):
+            plan = row[obj]
+            if plan["feasible"]:
+                found[key][frozenset(plan["ids"])] = dict(plan, banned=[])
+
+    def run(level_tasks, label):
+        if not level_tasks:
+            return
+        level_tasks.sort(key=lambda t: len(t[2]), reverse=True)
+        print(f"  alternatives {label} : {len(level_tasks)} recherches", flush=True)
+        with ProcessPoolExecutor(max_workers=args.workers, initializer=_init,
+                                 initargs=(args.time_model,)) as ex:
+            for (_m, key, _o, res), task in zip(ex.map(_job, level_tasks), level_tasks):
+                if res["feasible"]:
+                    res["proven"] = False
+                    res["banned"] = list(task[7])
+                    found[key].setdefault(frozenset(res["ids"]), res)
+
+    def tasks_from(key, plans, seen):
+        combo = tuple(combos[key]["combo"])
+        out = []
+        for plan in plans:
+            for r in plan["ids"]:
+                banned = tuple(sorted(set(plan.get("banned", [])) | set(_banned_for(ds, [r]))))
+                if banned in seen:
+                    continue
+                seen.add(banned)
+                for obj in ("projects", "days"):
+                    out.append((0, off, combo, obj, base_xp, tuple(sorted(done)),
+                                args.alt_budget if obj == "projects" else args.alt_days_budget,
+                                banned))
+        return out
+
+    seen = {k: set() for k in combos}
+    lvl1 = []
+    for key in combos:
+        lvl1 += tasks_from(key, list(found[key].values()), seen[key])
+    run(lvl1, "niveau 1")
+
+    lvl2 = []
+    for key in combos:
+        if len(found[key]) >= args.alternatives:
+            continue
+        alts = sorted((p for p in found[key].values() if p["banned"]),
+                      key=lambda p: (p["n"], p["days"]))[:3]
+        lvl2 += tasks_from(key, alts, seen[key])
+    run(lvl2, "niveau 2")
+
+    for key, row in combos.items():
+        plans = list(found[key].values())
+        by_days = sorted(plans, key=lambda p: (p["days"], p["n"]))
+        by_n = sorted(plans, key=lambda p: (p["n"], p["days"]))
+        keep, ids = [], set()
+        for p in by_days[:args.alternatives] + by_n[:args.alternatives]:
+            k = frozenset(p["ids"])
+            if k not in ids:
+                ids.add(k)
+                keep.append({k2: v for k2, v in p.items() if k2 != "banned"})
+        row["alts"] = keep
+        print(f"  {key:<34} {len(plans):>3} plans distincts, {len(keep)} gardes")
+
+
+def row_id(ds, pid):
+    """Ligne affichable d'un id : un module de piscine -> sa piscine."""
+    for c, ids in ds.bundles.items():
+        if pid in ids:
+            return c
+    return pid
+
+
+def pool_rows(ds, pool):
+    """Projets realisables d'un pool, une ligne par piscine."""
+    ok = {g["unit"] for g in ds.groups if g["kind"] != "dag"} | set(ds.unit_ids)
+    return sorted({row_id(ds, p) for p in pool} & ok)
 
 
 def project_table(ds, variants):
@@ -117,6 +214,15 @@ def project_table(ds, variants):
         for row in v.values():
             for obj in ("projects", "days"):
                 used |= set(row[obj]["ids"])
+            for alt in row.get("alts", []):
+                used |= set(alt["ids"])
+    for t in ds.titles.values():
+        for o in t["options"]:
+            used |= set(pool_rows(ds, o["pool"]))
+    for pool in (ds.suite_pool, ds.exp_pool, ds.group_pool):
+        used |= set(pool_rows(ds, pool))
+    for pid in list(used):
+        used |= set(ds.prereq_closure(pid))
     cats = {}
     for t in ds.titles.values():
         for o in t["options"]:
@@ -139,6 +245,8 @@ def project_table(ds, variants):
             row["sub"] = len(ids) - 1
         if pid in chain_of:
             row["ch"] = chain_of[pid]
+        if ds.prereqs.get(pid):
+            row["pre"] = ds.prereqs[pid]
         out[str(pid)] = row
     return out
 
@@ -147,9 +255,17 @@ def title_meta(ds):
     return {key: {
         "name": t["name"], "level": t["level"], "level_xp": int(t["level_xp"]),
         "events": t["n_events"], "exp": t["n_experiences"], "suite": t["n_suite"],
+        "group": t["n_group"],
         "options": [{"t": o["title"], "xp": o["min_xp"], "n": o["min_n"],
-                     "pool": len(o["pool"])} for o in t["options"]],
+                     "pool": len(o["pool"]), "ids": pool_rows(ds, o["pool"])}
+                    for o in t["options"]],
     } for key, t in ds.titles.items()}
+
+
+def extra_pools(ds):
+    return {"Experiences pro": pool_rows(ds, ds.exp_pool),
+            "Projet suite": pool_rows(ds, ds.suite_pool),
+            "Projets de groupe": pool_rows(ds, ds.group_pool)}
 
 
 def main():
@@ -163,10 +279,17 @@ def main():
     ap.add_argument("--days-budget", type=int, default=400_000)
     ap.add_argument("--no-variants", action="store_true",
                     help="ne calculer que le reglage ou toutes les chaines sont actives")
+    ap.add_argument("--alternatives", type=int, default=12,
+                    help="plans alternatifs gardes par combinaison et par mode (0 = aucun)")
+    ap.add_argument("--alt-budget", type=int, default=600_000)
+    ap.add_argument("--alt-days-budget", type=int, default=150_000)
     ap.add_argument("--workers", type=int, default=os.cpu_count() or 4)
     ap.add_argument("--time-model", choices=("clamped", "xp", "raw"), default="clamped")
     ap.add_argument("--out", default=os.path.normpath(
         os.path.join(HERE, "..", "public", "planner.html")))
+    ap.add_argument("--json-out", default=os.path.normpath(
+        os.path.join(HERE, "..", "src", "data", "planner.json")),
+                    help="donnees lues par la page /planner du site Next.js")
     args = ap.parse_args()
 
     ds = pl.Dataset(time_model=args.time_model)
@@ -205,12 +328,15 @@ def main():
         "variants": variants,
         "projects": project_table(ds, variants),
         "titles": title_meta(ds),
+        "pools": extra_pools(ds),
         "meta": {
             "generated": datetime.date.today().isoformat(),
             "rate": round(ds.rate, 2), "time_model": args.time_model,
             "groups": len(ds.groups), "bundles": len(ds.bundles),
             "excluded": len(ds.excluded), "risky": sorted(ds.risky),
             "cats": {v: k for k, v in CAT_CODE.items()},
+            "prereqs": len(ds.prereqs),
+            "source": "gcc.42.fr + holy graph intra Lyon (2026-11-20)",
         },
     }
     with open(os.path.join(HERE, "template.html")) as fh:
@@ -218,6 +344,10 @@ def main():
     with open(args.out, "w") as fh:
         fh.write(tpl.replace("/*__DATA__*/",
                              json.dumps(data, ensure_ascii=False, separators=(",", ":"))))
+    os.makedirs(os.path.dirname(args.json_out), exist_ok=True)
+    with open(args.json_out, "w") as fh:
+        json.dump(data, fh, ensure_ascii=False, separators=(",", ":"))
+    print(f"\n-> {args.json_out}")
     print(f"\n-> {args.out}  ({os.path.getsize(args.out) // 1024} Ko, "
           f"{time.time() - t0:.0f}s de calcul)")
 

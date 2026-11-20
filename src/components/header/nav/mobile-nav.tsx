@@ -4,24 +4,19 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
+  SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { Menu } from "lucide-react";
-import type { Session } from "next-auth";
 import Link, { type LinkProps } from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { navLinks } from "./links";
 
-export interface MobileNavProps {
-  session: Session | null;
-}
-
-export function MobileNav({ session }: MobileNavProps) {
+export function MobileNav() {
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -53,25 +48,16 @@ export function MobileNav({ session }: MobileNavProps) {
       >
         <ScrollArea className="h-full">
           <div className="flex flex-col divide-y">
-            {navLinks.map((link) => {
-              if (link.isProtected && session == null) {
-                return null;
-              }
-
-              return (
-                <MobileLink
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "py-5 font-medium transition-colors first:pt-0 last:pb-0 hover:text-foreground/80",
-                    link.className,
-                  )}
-                  onOpenChange={setOpen}
-                >
-                  {link.text}
-                </MobileLink>
-              );
-            })}
+            {navLinks.map((link) => (
+              <MobileLink
+                key={link.href}
+                href={link.href}
+                className="py-5 font-medium transition-colors first:pt-0 last:pb-0 hover:text-foreground/80"
+                onOpenChange={setOpen}
+              >
+                {link.text}
+              </MobileLink>
+            ))}
           </div>
         </ScrollArea>
       </SheetContent>

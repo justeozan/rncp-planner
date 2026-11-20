@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   experimental: {
     cacheComponents: true,
   },
+  async redirects() {
+    return [{ source: "/", destination: "/planner", permanent: false }];
+  },
 }
 
 export default withVercelToolbar()(nextConfig)

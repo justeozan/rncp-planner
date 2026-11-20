@@ -79,7 +79,10 @@ class Dataset:
             }
         self.suite_pool = set(raw["suite"]["projects"])
         self.exp_pool = set(raw["experience"]["projects"])
-        self.rncp_pool = set(self.suite_pool) | set(self.exp_pool)
+        self.group_pool = set(raw.get("group", {}).get("projects", []))
+        for t, rt in zip(self.titles.values(), raw["rncp"]):
+            t["n_group"] = int(rt.get("number_of_group", 0))
+        self.rncp_pool = set(self.suite_pool) | set(self.exp_pool) | self.group_pool
         for t in self.titles.values():
             for o in t["options"]:
                 self.rncp_pool |= o["pool"]
@@ -150,6 +153,7 @@ class Dataset:
                 in_chain[i] = ci
 
         self.groups, self.risky, self.bundles = [], set(), {}
+        pending = {}  # unit -> groupe, avant regroupement par prerequis
 
         # bundles : piscines et conteneurs
         for cid, kids in sorted(kids_of.items()):
@@ -174,11 +178,11 @@ class Dataset:
                 xp = float(kids_xp)
                 days = sum(self._days[k] for k in live)
             self.bundles[cid] = ids
-            self.groups.append({
+            pending[cid] = {
                 "kind": "bundle", "key": f"b{cid}", "label": self.name(cid),
                 "unit": cid,
                 "choices": [{"ids": (), "cost": 0, "xp": 0.0, "days": 0.0},
-                            {"ids": ids, "cost": 1, "xp": xp, "days": days}]})
+                            {"ids": ids, "cost": 1, "xp": xp, "days": days}]}
 
         # chaines de prerequis
         for ch in self.chains:
@@ -203,13 +207,109 @@ class Dataset:
                 if not in_pool:
                     continue
                 self.risky.add(pid)
-            self.groups.append({
+            pending[pid] = {
                 "kind": "single", "key": f"p{pid}", "label": self.name(pid), "unit": pid,
                 "choices": [{"ids": (), "cost": 0, "xp": 0.0, "days": 0.0},
                             {"ids": (pid,), "cost": 1, "xp": float(p["difficulty"]),
-                             "days": self._days[pid]}]})
+                             "days": self._days[pid]}]}
+
+        self._build_prereqs(pending)
+
+    def _build_prereqs(self, pending):
+        """Prerequis intra (holy graph) : un projet ne se debloque qu'une fois ses
+        prerequis valides. Chaque composante connexe du graphe devient un groupe
+        « dag » dont les choix sont ses ideaux (ensembles clos par prerequis) :
+        prendre kfs-4 inclut kfs-1..3, et leurs XP, jours et nombre de projets.
+        Un prerequis indisponible rend le projet indisponible.
+        """
+        raw = {int(k): [int(x) for x in v]
+               for k, v in self.rules.get("prereqs", {}).get("projects", {}).items()}
+        self.prereqs = {}
+        dead = set()
+        changed = True
+        while changed:
+            changed = False
+            for a, bs in raw.items():
+                if a not in pending or a in dead:
+                    continue
+                if any(b in dead or (b not in pending and b not in self.common_core)
+                       for b in bs):
+                    dead.add(a)
+                    changed = True
+        for a, bs in raw.items():
+            if a in pending and a not in dead:
+                need = [b for b in bs if b in pending]
+                if need:
+                    self.prereqs[a] = need
+        adj = {}
+        for a, bs in self.prereqs.items():
+            for b in bs:
+                adj.setdefault(a, set()).add(b)
+                adj.setdefault(b, set()).add(a)
+        comp_of, comps = {}, []
+        for start in sorted(adj):
+            if start in comp_of:
+                continue
+            stack, comp = [start], []
+            comp_of[start] = len(comps)
+            while stack:
+                x = stack.pop()
+                comp.append(x)
+                for y in adj[x]:
+                    if y not in comp_of:
+                        comp_of[y] = len(comps)
+                        stack.append(y)
+            comps.append(sorted(comp))
+        self.unit_ids = {u: g["choices"][1]["ids"] for u, g in pending.items()}
+        for u in sorted(pending, key=lambda u: -max(ch["xp"] for ch in pending[u]["choices"])):
+            if u in dead or u in comp_of:
+                continue
+            self.groups.append(pending[u])
+        for comp in comps:
+            topo, placed = [], set()
+            while len(topo) < len(comp):
+                for u in comp:
+                    if u not in placed and all(b in placed for b in self.prereqs.get(u, ())):
+                        topo.append(u)
+                        placed.add(u)
+            ideals = [()]
+            for u in topo:  # topo : les prerequis de u sont deja decides
+                nxt = []
+                for s in ideals:
+                    nxt.append(s)
+                    if all(b in s for b in self.prereqs.get(u, ())):
+                        nxt.append(s + (u,))
+                ideals = nxt
+            choices = []
+            for s in ideals:
+                ids = tuple(i for u in s for i in self.unit_ids[u])
+                choices.append({"ids": ids, "units": s, "cost": len(s),
+                                "xp": float(sum(self.xp(i) for i in ids)),
+                                "days": sum(self._days[i] for i in ids)})
+            sinks = [u for u in comp if not any(u in self.prereqs.get(v, ()) for v in comp)]
+            label = " / ".join(self.name(u) for u in sinks[:2]) + (" …" if len(sinks) > 2 else "")
+            self.groups.append({"kind": "dag", "key": f"d{topo[0]}", "label": label,
+                                "unit": topo[0], "choices": choices})
+        self.dag_of = comp_of
+
+    def prereq_closure(self, pid):
+        out, stack = [], list(self.prereqs.get(pid, ()))
+        while stack:
+            b = stack.pop()
+            if b not in out:
+                out.append(b)
+                stack.extend(self.prereqs.get(b, ()))
+        return out
 
     # ── helpers ──
+    def xp_pool(self, pool):
+        """Pool XP : une piscine apporte l'XP de tous ses modules (gcc compte
+        chaque module), mais ne compte qu'une fois en nombre de projets."""
+        out = set(pool)
+        for c in pool:
+            out |= set(self.bundles.get(c, ()))
+        return out
+
     def name(self, pid):
         return (self.projects[pid]["name"] or "").strip() or f"#{pid}"
 
@@ -242,7 +342,7 @@ class Constraint:
         self.label, self.kind, self.need = label, kind, need
 
 
-def build_slots(ds, done):
+def build_slots(ds, done, banned=frozenset()):
     """Copie les groupes en retirant ce qui est deja valide.
 
     Cout d'un choix = nombre de projets a valider. Une piscine compte pour 1 :
@@ -258,11 +358,19 @@ def build_slots(ds, done):
             ids = tuple(i for i in ch["ids"] if i not in done)
             if ch["ids"] and not ids:
                 continue
+            if banned and not banned.isdisjoint(ids):
+                continue
             if ids in seen:
                 continue
             seen.add(ids)
-            uniq.append({"ids": ids,
-                         "cost": (1 if ids else 0) if g["kind"] == "bundle" else len(ids),
+            if g["kind"] == "bundle":
+                cost = 1 if ids else 0
+            elif g["kind"] == "dag":
+                cost = sum(1 for u in ch["units"]
+                           if any(i not in done for i in ds.unit_ids[u]))
+            else:
+                cost = len(ids)
+            uniq.append({"ids": ids, "cost": cost,
                          "xp": float(sum(ds.xp(i) for i in ids)),
                          "days": sum(ds.days(i) for i in ids)})
         if len(uniq) < 2:
@@ -273,7 +381,7 @@ def build_slots(ds, done):
 
 def relevant_pool(ds, combo):
     """Tous les projets qui comptent pour une condition de cette combinaison."""
-    pool = set(ds.suite_pool) | set(ds.exp_pool)
+    pool = set(ds.suite_pool) | set(ds.exp_pool) | set(ds.group_pool)
     for key in combo:
         for o in ds.titles[key]["options"]:
             pool |= o["pool"]
@@ -300,7 +408,7 @@ def prune_fillers(ds, combo, slots, objective, cap):
     keep, fillers = [], []
     for s in slots:
         useful = any(i in pool for ch in s["choices"] for i in ch["ids"])
-        if useful or s["kind"] == "chain":
+        if useful or s["kind"] in ("chain", "dag"):
             keep.append(s)
         else:
             fillers.append(s)
@@ -345,10 +453,10 @@ def build_constraints(ds, combo, slots, base_xp, done):
             if sig in seen:
                 continue
             seen.add(sig)
-            pool = o["pool"]
+            pool, xpool = o["pool"], ds.xp_pool(o["pool"])
             add(f"{o['title']} · XP", "xp",
-                o["min_xp"] - sum(ds.xp(i) for i in done if i in pool),
-                lambda ids, pool=pool: sum(ds.xp(i) for i in ids if i in pool))
+                o["min_xp"] - sum(ds.xp(i) for i in done if i in xpool),
+                lambda ids, xpool=xpool: sum(ds.xp(i) for i in ids if i in xpool))
             add(f"{o['title']} · projets", "count",
                 o["min_n"] - sum(1 for i in done if i in pool),
                 lambda ids, pool=pool: sum(1 for i in ids if i in pool))
@@ -361,6 +469,10 @@ def build_constraints(ds, combo, slots, base_xp, done):
         max(ds.titles[k]["n_suite"] for k in combo)
         - sum(1 for i in done if i in ds.suite_pool),
         lambda ids: sum(1 for i in ids if i in ds.suite_pool))
+    add("Projets de groupe", "count",
+        max(ds.titles[k]["n_group"] for k in combo)
+        - sum(1 for i in done if i in ds.group_pool),
+        lambda ids: sum(1 for i in ids if i in ds.group_pool))
     return cons
 
 
@@ -384,12 +496,14 @@ class Solver:
                 else:
                     ch["c1"], ch["c2"] = ch["days"], float(ch["cost"])
 
+        self._prune_dominated(slots)
+
         def rank(s):
             real = [ch for ch in s["choices"] if ch["ids"]]
             # a nombre de projets plafonne, on doit viser l'XP d'abord : sinon la
             # descente epuise son budget sur des petits projets et ne trouve rien.
             if objective == "projects" or max_count is not None:
-                return -max(ch["xp"] for ch in real)
+                return -max((ch["xp"] for ch in real), default=0.0)
             return -max((ch["xp"] / ch["days"]) if ch["days"] > 0 else INF for ch in real)
 
         slots.sort(key=rank)
@@ -401,6 +515,34 @@ class Solver:
         self.slots, self.n = slots, len(slots)
         self._build_bounds()
         self.best, self.best_cost = None, (INF, INF)
+
+    def _prune_dominated(self, slots):
+        """Groupes « dag » : beaucoup d'ideaux ne servent a rien pour une
+        combinaison donnee. On retire ceux qu'un autre choix bat partout
+        (apport >= sur chaque condition, cout et duree <=)."""
+        for s in slots:
+            if len(s["choices"]) <= 2:
+                continue
+            i = s["_idx"]
+            vec = [tuple(c.contrib[i][j] for c in self.cons) for j in range(len(s["choices"]))]
+            keep = []
+            for j, ch in enumerate(s["choices"]):
+                dom = False
+                for k, o in enumerate(s["choices"]):
+                    if k == j:
+                        continue
+                    if (o["c1"] <= ch["c1"] + 1e-9 and o["c2"] <= ch["c2"] + 1e-9
+                            and all(x >= y - 1e-9 for x, y in zip(vec[k], vec[j]))
+                            and (o["c1"], o["c2"], vec[k]) != (ch["c1"], ch["c2"], vec[j])
+                            or (k < j and (o["c1"], o["c2"], vec[k]) == (ch["c1"], ch["c2"], vec[j]))):
+                        dom = True
+                        break
+                if not dom or not ch["ids"]:
+                    keep.append(j)
+            if len(keep) < len(s["choices"]):
+                s["choices"] = [s["choices"][j] for j in keep]
+                for c in self.cons:
+                    c.contrib[i] = [c.contrib[i][j] for j in keep]
 
     def _build_bounds(self):
         n = self.n
@@ -499,36 +641,102 @@ class Solver:
         return self._combine(lbs, self.cons)
 
     def _greedy(self):
-        got, picked, used = [0.0] * len(self.cons), [], set()
+        """Glouton avec ameliorations : un groupe deja pris peut passer a un
+        choix plus grand (ex. ajouter kfs-3 a kfs-1..2)."""
+        cons = self.cons
+        got, cur = [0.0] * len(cons), [None] * self.n
         c1 = c2 = 0.0
-        for _ in range(self.n):
-            if all(got[k] >= c.need - 1e-9 for k, c in enumerate(self.cons)):
+
+        def value(k, x):
+            return min(x, cons[k].need) / cons[k].need if cons[k].need > 0 else 0.0
+
+        for _ in range(4 * self.n + 10):
+            if all(got[k] >= c.need - 1e-9 for k, c in enumerate(cons)):
                 break
             best = None
             for i in range(self.n):
-                if i in used:
-                    continue
+                j0 = cur[i]
+                o1 = self.slots[i]["choices"][j0]["c1"] if j0 is not None else 0.0
                 for j, ch in enumerate(self.slots[i]["choices"]):
-                    if not ch["ids"] or ch["c1"] <= 0:
+                    if j == j0 or not ch["ids"]:
                         continue
-                    gain = sum(min(c.contrib[i][j], c.need - got[k]) / c.need
-                               for k, c in enumerate(self.cons) if c.need - got[k] > 1e-9)
-                    if gain <= 0:
+                    gain = 0.0
+                    for k, c in enumerate(cons):
+                        d = c.contrib[i][j] - (c.contrib[i][j0] if j0 is not None else 0.0)
+                        if d:
+                            gain += value(k, got[k] + d) - value(k, got[k])
+                    if gain <= 1e-12:
                         continue
-                    sc = gain / ch["c1"]
+                    sc = gain / max(ch["c1"] - o1, 1e-6)
                     if best is None or sc > best[0]:
                         best = (sc, i, j)
             if best is None:
                 return
             _, i, j = best
-            used.add(i)
-            picked.append((i, j))
+            j0 = cur[i]
+            if j0 is not None:
+                old = self.slots[i]["choices"][j0]
+                c1, c2 = c1 - old["c1"], c2 - old["c2"]
+                for k, c in enumerate(cons):
+                    got[k] -= c.contrib[i][j0]
             ch = self.slots[i]["choices"][j]
             c1, c2 = c1 + ch["c1"], c2 + ch["c2"]
-            for k, c in enumerate(self.cons):
+            for k, c in enumerate(cons):
                 got[k] += c.contrib[i][j]
-        if all(got[k] >= c.need - 1e-9 for k, c in enumerate(self.cons)):
-            self.best, self.best_cost = sorted(picked), (c1, c2)
+            cur[i] = j
+        if all(got[k] >= c.need - 1e-9 for k, c in enumerate(cons)):
+            self.best = [(i, j) for i, j in enumerate(cur) if j is not None]
+            self.best_cost = (c1, c2)
+
+    def local_search(self, max_count=None):
+        """Ameliore la meilleure solution par echanges : retirer un choix,
+        remplacer un choix par un autre (meme groupe ou autre groupe), ou en
+        remplacer deux par un. Le B&B en temps a un budget borne ; ces echanges
+        recuperent l'essentiel de l'ecart sur les grosses combinaisons."""
+        if self.best is None:
+            return
+        cons, nk = self.cons, len(self.cons)
+        cur = {i: j for i, j in self.best}
+
+        def totals(cur):
+            got, c1, c2, cnt = [0.0] * nk, 0.0, 0.0, 0
+            for i, j in cur.items():
+                ch = self.slots[i]["choices"][j]
+                c1, c2, cnt = c1 + ch["c1"], c2 + ch["c2"], cnt + ch["cost"]
+                for k, c in enumerate(cons):
+                    got[k] += c.contrib[i][j]
+            return got, (c1, c2), cnt
+
+        def ok(got, cnt):
+            return (all(got[k] >= c.need - 1e-9 for k, c in enumerate(cons))
+                    and (max_count is None or cnt <= max_count))
+
+        got, cost, cnt = totals(cur)
+        if not ok(got, cnt):
+            return
+        moves = [(i, j) for i in range(self.n)
+                 for j, ch in enumerate(self.slots[i]["choices"]) if ch["ids"]]
+        improved = True
+        while improved:
+            improved = False
+            keys = list(cur)
+            cands = [[k] for k in keys] + [[a, b] for x, a in enumerate(keys) for b in keys[x + 1:]]
+            for out in cands:
+                base = {i: j for i, j in cur.items() if i not in out}
+                for i, j in [(None, None)] + moves:
+                    trial = dict(base)
+                    if i is not None:
+                        if i in base or (len(out) == 1 and i == out[0] and j == cur[i]):
+                            continue
+                        trial[i] = j
+                    g, cst, cn = totals(trial)
+                    if cst < cost and ok(g, cn):
+                        cur, cost, got, cnt = trial, cst, g, cn
+                        improved = True
+                        break
+                if improved:
+                    break
+        self.best, self.best_cost = sorted(cur.items()), cost
 
     def seed_with(self, ids):
         """Borne superieure de depart a partir d'un plan deja connu."""
@@ -632,7 +840,7 @@ def check(ds, combo, ids, base_xp, done):
             if sig in seen:
                 continue
             seen.add(sig)
-            hx = sum(ds.xp(i) for i in sel if i in o["pool"])
+            hx = sum(ds.xp(i) for i in sel if i in ds.xp_pool(o["pool"]))
             hn = sum(1 for i in sel if i in o["pool"])
             rows.append({"label": f"{o['title']} · XP", "need": o["min_xp"], "have": int(hx),
                          "unit": "xp", "ok": hx >= o["min_xp"]})
@@ -641,6 +849,7 @@ def check(ds, combo, ids, base_xp, done):
     for label, pool, n in (
         ("Experiences pro", ds.exp_pool, max(ds.titles[k]["n_experiences"] for k in combo)),
         ("Projet suite", ds.suite_pool, max(ds.titles[k]["n_suite"] for k in combo)),
+        ("Projets de groupe", ds.group_pool, max(ds.titles[k]["n_group"] for k in combo)),
     ):
         have = sum(1 for i in sel if i in pool)
         rows.append({"label": label, "need": n, "have": have, "unit": "n", "ok": have >= n})
@@ -679,13 +888,15 @@ _INFEASIBLE = {"feasible": False, "units": [], "projects": [], "rows": [], "n": 
                "proven": True, "days_proven": True, "checks": []}
 
 
-def solve_combo(ds, combo, base_xp, done, objective, budget=400_000):
+def solve_combo(ds, combo, base_xp, done, objective, budget=400_000,
+                banned=frozenset()):
     """objective='projects' : nombre de projets minimal (prouve), puis le plan
     le plus court a ce nombre -> resultat stable et reproductible.
     objective='days'       : duree totale minimale, sans limite de nombre.
+    banned : projets interdits, pour chercher des plans alternatifs.
     """
     def fresh(objective=None, cap=None):
-        sl = build_slots(ds, done)
+        sl = build_slots(ds, done, banned)
         if objective is not None:
             cons0 = build_constraints(ds, combo, sl, base_xp, done)
             sl = prune_fillers(ds, combo, sl, objective, cap)
@@ -694,16 +905,24 @@ def solve_combo(ds, combo, base_xp, done, objective, budget=400_000):
 
     def probe_ub():
         """Nombre de projets d'une solution gloutonne : majorant de l'optimum."""
-        sl = build_slots(ds, done)
+        sl = build_slots(ds, done, banned)
         cons = build_constraints(ds, combo, sl, base_xp, done)
         sv = Solver(sl, cons, "projects", 1)
         sv._greedy()
         return int(sv.best_cost[0]) if sv.best is not None else None
 
     if objective == "days":
+        seed = solve_combo(ds, combo, base_xp, done, "projects", budget // 4, banned)
         sl, cons = fresh()
         sv = Solver(sl, cons, "days", budget)
+        if seed.get("feasible"):
+            sv.seed_with(seed["projects"])
         best, _, nodes, proven = sv.solve()
+        if best is None and seed.get("feasible"):
+            return seed
+        if best is not None and not proven:
+            sv.local_search()
+            best = sv.best
         if best is None:
             return dict(_INFEASIBLE, nodes=nodes, proven=proven)
         return _plan(ds, combo, base_xp, done, sv, best, nodes, proven)
@@ -728,6 +947,9 @@ def solve_combo(ds, combo, base_xp, done, objective, budget=400_000):
     sv2 = Solver(sl2, cons2, "days", budget, max_count=n_opt)
     sv2.seed_with(plan["projects"])
     best2, cost2, nodes2, proven2 = sv2.solve()
+    if best2 is not None and not proven2:
+        sv2.local_search(max_count=n_opt)
+        best2, cost2 = sv2.best, sv2.best_cost
     if best2 is not None and cost2[0] < plan["days"] - 1e-6:
         p2 = _plan(ds, combo, base_xp, done, sv2, best2, nodes + nodes2, True)
         if p2["n"] <= n_opt:

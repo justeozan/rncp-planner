@@ -2220,7 +2220,7 @@
       "id": 1662,
       "name": "Startup Internship",
       "slug": "42cursus-startup-internship",
-      "difficulty": 42000,
+      "difficulty": 63000,
       "completions": 66,
       "duration": 9425466,
       "created_at": "2019-10-31T15:53:33.879000+00:00",
@@ -2668,7 +2668,7 @@
     },
     {
       "id": 1857,
-      "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e",
+      "name": "Apprentissage 2 ans - 1ère année",
       "slug": "42cursus-apprentissage-2-ans-1ere-annee",
       "difficulty": 0,
       "completions": 84,
@@ -2679,22 +2679,22 @@
       "parent": null,
       "children": [
         {
-          "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e - 1",
+          "name": "Apprentissage 2 ans - 1ère année - 1",
           "id": 1861,
           "slug": "apprentissage-2-ans-1ere-annee-apprentissage-2-ans-1ere-annee-1"
         },
         {
-          "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e - 2",
+          "name": "Apprentissage 2 ans - 1ère année - 2",
           "id": 1862,
           "slug": "apprentissage-2-ans-1ere-annee-apprentissage-2-ans-1ere-annee-2"
         },
         {
-          "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e - 3",
+          "name": "Apprentissage 2 ans - 1ère année - 3",
           "id": 1863,
           "slug": "apprentissage-2-ans-1ere-annee-apprentissage-2-ans-1ere-annee-3"
         },
         {
-          "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e - 4",
+          "name": "Apprentissage 2 ans - 1ère année - 4",
           "id": 1864,
           "slug": "apprentissage-2-ans-1ere-annee-apprentissage-2-ans-1ere-annee-4"
         }
@@ -2702,7 +2702,7 @@
     },
     {
       "id": 1861,
-      "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e - 1",
+      "name": "Apprentissage 2 ans - 1ère année - 1",
       "slug": "apprentissage-2-ans-1ere-annee-apprentissage-2-ans-1ere-annee-1",
       "difficulty": 15000,
       "completions": 109,
@@ -2711,7 +2711,7 @@
       "updated_at": "2024-08-30T09:14:29.644000+00:00",
       "exam": false,
       "parent": {
-        "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e",
+        "name": "Apprentissage 2 ans - 1ère année",
         "id": 1857,
         "slug": "42cursus-apprentissage-2-ans-1ere-annee"
       },
@@ -2719,7 +2719,7 @@
     },
     {
       "id": 1862,
-      "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e - 2",
+      "name": "Apprentissage 2 ans - 1ère année - 2",
       "slug": "apprentissage-2-ans-1ere-annee-apprentissage-2-ans-1ere-annee-2",
       "difficulty": 20000,
       "completions": 108,
@@ -2728,7 +2728,7 @@
       "updated_at": "2024-08-30T09:14:29.631000+00:00",
       "exam": false,
       "parent": {
-        "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e",
+        "name": "Apprentissage 2 ans - 1ère année",
         "id": 1857,
         "slug": "42cursus-apprentissage-2-ans-1ere-annee"
       },
@@ -2736,7 +2736,7 @@
     },
     {
       "id": 1863,
-      "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e - 3",
+      "name": "Apprentissage 2 ans - 1ère année - 3",
       "slug": "apprentissage-2-ans-1ere-annee-apprentissage-2-ans-1ere-annee-3",
       "difficulty": 22150,
       "completions": 106,
@@ -2745,7 +2745,7 @@
       "updated_at": "2024-08-30T09:14:29.618000+00:00",
       "exam": false,
       "parent": {
-        "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e",
+        "name": "Apprentissage 2 ans - 1ère année",
         "id": 1857,
         "slug": "42cursus-apprentissage-2-ans-1ere-annee"
       },
@@ -2753,7 +2753,7 @@
     },
     {
       "id": 1864,
-      "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e - 4",
+      "name": "Apprentissage 2 ans - 1ère année - 4",
       "slug": "apprentissage-2-ans-1ere-annee-apprentissage-2-ans-1ere-annee-4",
       "difficulty": 33150,
       "completions": 105,
@@ -2762,7 +2762,7 @@
       "updated_at": "2024-08-30T09:14:29.605000+00:00",
       "exam": false,
       "parent": {
-        "name": "Apprentissage 2 ans - 1\u00e8re ann\u00e9e",
+        "name": "Apprentissage 2 ans - 1ère année",
         "id": 1857,
         "slug": "42cursus-apprentissage-2-ans-1ere-annee"
       },
@@ -2770,7 +2770,7 @@
     },
     {
       "id": 1865,
-      "name": " Apprentissage 2 ans - 2\u00e8me ann\u00e9e",
+      "name": " Apprentissage 2 ans - 2ème année",
       "slug": "apprentissage-2-ans-2eme-annee",
       "difficulty": 0,
       "completions": 65,
@@ -2781,22 +2781,22 @@
       "parent": null,
       "children": [
         {
-          "name": "Apprentissage 2 ans - 2\u00e8me ann\u00e9e - 1",
+          "name": "Apprentissage 2 ans - 2ème année - 1",
           "id": 1869,
           "slug": "apprentissage-2-ans-2eme-annee-apprentissage-2-ans-2eme-annee-1"
         },
         {
-          "name": "Apprentissage 2 ans - 2\u00e8me ann\u00e9e - 2",
+          "name": "Apprentissage 2 ans - 2ème année - 2",
           "id": 1870,
           "slug": "apprentissage-2-ans-2eme-annee-apprentissage-2-ans-2eme-annee-2"
         },
         {
-          "name": "Apprentissage 2 ans - 2\u00e8me ann\u00e9e - 3",
+          "name": "Apprentissage 2 ans - 2ème année - 3",
           "id": 1871,
           "slug": "apprentissage-2-ans-2eme-annee-apprentissage-2-ans-2eme-annee-3"
         },
         {
-          "name": "Apprentissage 2 ans - 2\u00e8me ann\u00e9e - 4",
+          "name": "Apprentissage 2 ans - 2ème année - 4",
           "id": 1872,
           "slug": "apprentissage-2-ans-2eme-annee-apprentissage-2-ans-2eme-annee-4"
         }
@@ -2804,7 +2804,7 @@
     },
     {
       "id": 1869,
-      "name": "Apprentissage 2 ans - 2\u00e8me ann\u00e9e - 1",
+      "name": "Apprentissage 2 ans - 2ème année - 1",
       "slug": "apprentissage-2-ans-2eme-annee-apprentissage-2-ans-2eme-annee-1",
       "difficulty": 15000,
       "completions": 92,
@@ -2813,7 +2813,7 @@
       "updated_at": "2024-08-30T09:14:29.541000+00:00",
       "exam": false,
       "parent": {
-        "name": " Apprentissage 2 ans - 2\u00e8me ann\u00e9e",
+        "name": " Apprentissage 2 ans - 2ème année",
         "id": 1865,
         "slug": "apprentissage-2-ans-2eme-annee"
       },
@@ -2821,7 +2821,7 @@
     },
     {
       "id": 1870,
-      "name": "Apprentissage 2 ans - 2\u00e8me ann\u00e9e - 2",
+      "name": "Apprentissage 2 ans - 2ème année - 2",
       "slug": "apprentissage-2-ans-2eme-annee-apprentissage-2-ans-2eme-annee-2",
       "difficulty": 20000,
       "completions": 92,
@@ -2830,7 +2830,7 @@
       "updated_at": "2024-08-30T09:14:29.519000+00:00",
       "exam": false,
       "parent": {
-        "name": " Apprentissage 2 ans - 2\u00e8me ann\u00e9e",
+        "name": " Apprentissage 2 ans - 2ème année",
         "id": 1865,
         "slug": "apprentissage-2-ans-2eme-annee"
       },
@@ -2838,7 +2838,7 @@
     },
     {
       "id": 1871,
-      "name": "Apprentissage 2 ans - 2\u00e8me ann\u00e9e - 3",
+      "name": "Apprentissage 2 ans - 2ème année - 3",
       "slug": "apprentissage-2-ans-2eme-annee-apprentissage-2-ans-2eme-annee-3",
       "difficulty": 22150,
       "completions": 89,
@@ -2847,7 +2847,7 @@
       "updated_at": "2024-08-30T09:14:29.499000+00:00",
       "exam": false,
       "parent": {
-        "name": " Apprentissage 2 ans - 2\u00e8me ann\u00e9e",
+        "name": " Apprentissage 2 ans - 2ème année",
         "id": 1865,
         "slug": "apprentissage-2-ans-2eme-annee"
       },
@@ -2855,7 +2855,7 @@
     },
     {
       "id": 1872,
-      "name": "Apprentissage 2 ans - 2\u00e8me ann\u00e9e - 4",
+      "name": "Apprentissage 2 ans - 2ème année - 4",
       "slug": "apprentissage-2-ans-2eme-annee-apprentissage-2-ans-2eme-annee-4",
       "difficulty": 33150,
       "completions": 85,
@@ -2864,7 +2864,7 @@
       "updated_at": "2024-08-30T09:14:29.473000+00:00",
       "exam": false,
       "parent": {
-        "name": " Apprentissage 2 ans - 2\u00e8me ann\u00e9e",
+        "name": " Apprentissage 2 ans - 2ème année",
         "id": 1865,
         "slug": "apprentissage-2-ans-2eme-annee"
       },
@@ -3171,7 +3171,7 @@
       "id": 1983,
       "name": "Inception",
       "slug": "inception",
-      "difficulty": 10042,
+      "difficulty": 15836,
       "completions": 9054,
       "duration": 5358723,
       "created_at": "2021-04-20T13:48:06.080000+00:00",
@@ -4294,7 +4294,7 @@
           "slug": "ocaml-pattern-matching-and-data-types-0"
         },
         {
-          "name": "OCAML  - OCaml\u2019s modules language - 1",
+          "name": "OCAML  - OCaml’s modules language - 1",
           "id": 2251,
           "slug": "ocaml-ocaml-s-modules-language-1"
         },
@@ -4378,7 +4378,7 @@
     },
     {
       "id": 2251,
-      "name": "OCAML  - OCaml\u2019s modules language - 1",
+      "name": "OCAML  - OCaml’s modules language - 1",
       "slug": "ocaml-ocaml-s-modules-language-1",
       "difficulty": 0,
       "completions": 3,
@@ -5861,9 +5861,9 @@
       "id": 2531,
       "name": "ft_kleene",
       "slug": "ft_kleene",
-      "difficulty": 0,
+      "difficulty": 13500,
       "completions": 0,
-      "duration": 0,
+      "duration": 504000,
       "created_at": "2023-10-04T06:41:51.579000+00:00",
       "updated_at": "2024-09-11T14:03:40.734000+00:00",
       "exam": false,
@@ -6069,9 +6069,9 @@
       "id": 2746,
       "name": "Inception of context",
       "slug": "inception-of-context",
-      "difficulty": 0,
+      "difficulty": 19800,
       "completions": 0,
-      "duration": 0,
+      "duration": 792000,
       "created_at": "2026-07-10T16:55:39.544000+00:00",
       "updated_at": "2026-09-03T08:48:15.780000+00:00",
       "exam": false,
@@ -6082,9 +6082,9 @@
       "id": 2747,
       "name": "ft_lgtm",
       "slug": "ft_lgtm",
-      "difficulty": 0,
+      "difficulty": 16200,
       "completions": 0,
-      "duration": 0,
+      "duration": 648000,
       "created_at": "2026-07-10T16:59:00.413000+00:00",
       "updated_at": "2026-09-02T16:55:48.614000+00:00",
       "exam": false,
@@ -6095,9 +6095,9 @@
       "id": 2748,
       "name": "Supercharge",
       "slug": "supercharge",
-      "difficulty": 0,
+      "difficulty": 12600,
       "completions": 0,
-      "duration": 0,
+      "duration": 504000,
       "created_at": "2026-07-10T16:59:43.610000+00:00",
       "updated_at": "2026-09-02T16:56:40.064000+00:00",
       "exam": false,
@@ -6108,9 +6108,9 @@
       "id": 2749,
       "name": "RetroEmu",
       "slug": "retroemu",
-      "difficulty": 0,
+      "difficulty": 37800,
       "completions": 0,
-      "duration": 0,
+      "duration": 1512000,
       "created_at": "2026-07-10T17:00:47.044000+00:00",
       "updated_at": "2026-09-02T15:18:21.516000+00:00",
       "exam": false,
@@ -6121,9 +6121,9 @@
       "id": 2750,
       "name": "Inception of wisdom",
       "slug": "inception-of-wisdom",
-      "difficulty": 0,
+      "difficulty": 21600,
       "completions": 0,
-      "duration": 0,
+      "duration": 864000,
       "created_at": "2026-07-10T17:18:36.881000+00:00",
       "updated_at": "2026-09-03T09:19:25.214000+00:00",
       "exam": false,
@@ -6147,9 +6147,9 @@
       "id": 2752,
       "name": "Ecomesh",
       "slug": "ecomesh",
-      "difficulty": 0,
+      "difficulty": 19286,
       "completions": 0,
-      "duration": 0,
+      "duration": 720000,
       "created_at": "2026-08-12T15:28:45.833000+00:00",
       "updated_at": "2026-09-02T16:53:57.930000+00:00",
       "exam": false,

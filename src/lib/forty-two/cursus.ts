@@ -1,18 +1,7 @@
-import { auth, signOut } from "@/auth";
 import type { FortyTwoCursus } from "@/types/forty-two";
-import { kv } from "@vercel/kv";
 
-export async function getFortyTwoCursus(): Promise<FortyTwoCursus | undefined> {
-  "use server";
-  const session = await auth();
-
-  let cursus: FortyTwoCursus | undefined;
-  try {
-    cursus = (await kv.get(`cursus:${session?.user.login}`)) ?? undefined;
-  } catch (error) {
-    process.stderr.write(`Error getting cursus: ${error}\n`);
-    await signOut();
-  }
-
-  return cursus;
+// No account: there is no 42 data to load, so the store falls back to its
+// default empty cursus (level 0, no projects).
+export function getFortyTwoCursus(): Promise<FortyTwoCursus | undefined> {
+  return Promise.resolve(undefined);
 }
