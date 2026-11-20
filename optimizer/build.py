@@ -241,8 +241,13 @@ def project_table(ds, variants):
                "d": round(sum(ds.days(i) for i in ids)),
                "t": ds.tags(pid), "s": ds.days_source.get(pid, ""),
                "c": sorted(cats.get(pid, ()))}
+        slug = ds.projects.get(pid, {}).get("slug")
+        if slug:
+            row["sl"] = slug
         if len(ids) > 1:
             row["sub"] = len(ids) - 1
+        if len(ids) > 1 or "piscine" in row["n"].lower():
+            row["pi"] = 1
         if pid in chain_of:
             row["ch"] = chain_of[pid]
         if ds.prereqs.get(pid):

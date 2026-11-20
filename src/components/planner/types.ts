@@ -58,6 +58,10 @@ export interface Project {
   ch?: [string, number, number];
   /** Projects that must be validated first (intra prerequisites). */
   pre?: number[];
+  /** Intra slug, for the project link. */
+  sl?: string;
+  /** 1 when the project is a piscine. */
+  pi?: 1;
 }
 
 export interface TitleInfo {
