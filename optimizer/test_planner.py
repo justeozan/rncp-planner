@@ -72,6 +72,11 @@ def main():
                 bad.append(ch["label"])
         ok(not bad, f"{'+'.join(combo)} : chaines coherentes"
            + (f" — cassees : {bad}" if bad else ""))
+        # prerequis intra (holy graph) : tout projet pris a ses prerequis pris
+        miss = [(ds.name(a), ds.name(b)) for a in sel for b in ds.prereqs.get(a, ())
+                if not set(ds.unit_ids[b]) <= sel]
+        ok(not miss, f"{'+'.join(combo)} : prerequis intra respectes"
+           + (f" — manquants : {miss}" if miss else ""))
 
     print("\n4. piscines : prendre une piscine prend tous ses modules")
     for combo, p in plans.items():

@@ -67,7 +67,6 @@ export function Planner({
 
   const level = Math.max(...selected.map((key) => data.titles[key].level));
   const events = Math.max(...selected.map((key) => data.titles[key].events));
-  const exp = Math.max(...selected.map((key) => data.titles[key].exp));
   const done = data.baseline.done.map((project) => project.n).join(", ");
 
   return (
@@ -105,14 +104,16 @@ export function Planner({
               </span>
             </p>
             <p className="text-muted-foreground text-xs">
-              Covers level {level}, {exp} internships and the suite project. Not
-              included: {events} events to attend. From level{" "}
+              Covers level {level} and every condition below; prerequisites
+              needed to unlock a project are counted. Not included: {events}{" "}
+              events to attend. Rules: gcc.42.fr, Nov. 2026. From level{" "}
               {data.baseline.level}
               {done && ` (${done} done)`}, ~{data.meta.rate} days per 1000 XP.
             </p>
           </div>
           <Path
             ids={plan.ids}
+            checks={plan.checks}
             selected={combo.combo}
             data={data}
           />

@@ -54,6 +54,8 @@ export interface Project {
   c?: string[];
   sub?: number;
   ch?: [string, number, number];
+  /** Projects that must be validated first (intra prerequisites). */
+  pre?: number[];
 }
 
 export interface TitleInfo {
@@ -63,7 +65,8 @@ export interface TitleInfo {
   events: number;
   exp: number;
   suite: number;
-  options: { t: string; xp: number; n: number; pool: number }[];
+  group: number;
+  options: { t: string; xp: number; n: number; pool: number; ids: number[] }[];
 }
 
 export interface PlannerData {
@@ -78,6 +81,8 @@ export interface PlannerData {
   variants: Record<string, Record<string, Combo>>;
   projects: Record<string, Project>;
   titles: Record<TitleKey, TitleInfo>;
+  /** Pools of the general conditions, by label. */
+  pools: Record<string, number[]>;
   meta: {
     rate: number;
     cats: Record<string, string>;

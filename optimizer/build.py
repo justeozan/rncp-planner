@@ -109,6 +109,20 @@ def collect(chains, base_xp, done, args):
     return variants
 
 
+def row_id(ds, pid):
+    """Ligne affichable d'un id : un module de piscine -> sa piscine."""
+    for c, ids in ds.bundles.items():
+        if pid in ids:
+            return c
+    return pid
+
+
+def pool_rows(ds, pool):
+    """Projets realisables d'un pool, une ligne par piscine."""
+    ok = {g["unit"] for g in ds.groups if g["kind"] != "dag"} | set(ds.unit_ids)
+    return sorted({row_id(ds, p) for p in pool} & ok)
+
+
 def project_table(ds, variants):
     """Une fiche par ligne affichable. Une piscine porte l'XP et la duree de
     tous ses modules, et dit combien ils sont."""
@@ -117,6 +131,13 @@ def project_table(ds, variants):
         for row in v.values():
             for obj in ("projects", "days"):
                 used |= set(row[obj]["ids"])
+    for t in ds.titles.values():
+        for o in t["options"]:
+            used |= set(pool_rows(ds, o["pool"]))
+    for pool in (ds.suite_pool, ds.exp_pool, ds.group_pool):
+        used |= set(pool_rows(ds, pool))
+    for pid in list(used):
+        used |= set(ds.prereq_closure(pid))
     cats = {}
     for t in ds.titles.values():
         for o in t["options"]:
@@ -139,6 +160,8 @@ def project_table(ds, variants):
             row["sub"] = len(ids) - 1
         if pid in chain_of:
             row["ch"] = chain_of[pid]
+        if ds.prereqs.get(pid):
+            row["pre"] = ds.prereqs[pid]
         out[str(pid)] = row
     return out
 
@@ -147,9 +170,17 @@ def title_meta(ds):
     return {key: {
         "name": t["name"], "level": t["level"], "level_xp": int(t["level_xp"]),
         "events": t["n_events"], "exp": t["n_experiences"], "suite": t["n_suite"],
+        "group": t["n_group"],
         "options": [{"t": o["title"], "xp": o["min_xp"], "n": o["min_n"],
-                     "pool": len(o["pool"])} for o in t["options"]],
+                     "pool": len(o["pool"]), "ids": pool_rows(ds, o["pool"])}
+                    for o in t["options"]],
     } for key, t in ds.titles.items()}
+
+
+def extra_pools(ds):
+    return {"Experiences pro": pool_rows(ds, ds.exp_pool),
+            "Projet suite": pool_rows(ds, ds.suite_pool),
+            "Projets de groupe": pool_rows(ds, ds.group_pool)}
 
 
 def main():
@@ -208,12 +239,15 @@ def main():
         "variants": variants,
         "projects": project_table(ds, variants),
         "titles": title_meta(ds),
+        "pools": extra_pools(ds),
         "meta": {
             "generated": datetime.date.today().isoformat(),
             "rate": round(ds.rate, 2), "time_model": args.time_model,
             "groups": len(ds.groups), "bundles": len(ds.bundles),
             "excluded": len(ds.excluded), "risky": sorted(ds.risky),
             "cats": {v: k for k, v in CAT_CODE.items()},
+            "prereqs": len(ds.prereqs),
+            "source": "gcc.42.fr + holy graph intra Lyon (2026-11-20)",
         },
     }
     with open(os.path.join(HERE, "template.html")) as fh:
