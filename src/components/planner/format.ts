@@ -1,10 +1,4 @@
-import {
-  type Combo,
-  type Plan,
-  type PlannerData,
-  TITLE_KEYS,
-  type TitleKey,
-} from "./types";
+import { type Combo, type Plan, TITLE_KEYS, type TitleKey } from "./types";
 
 const THOUSAND = 1000;
 
@@ -28,39 +22,74 @@ export function comboKey(selected: readonly TitleKey[]): string {
 export type Mode = "days" | "projects";
 
 export interface Ranked {
+  /** Sorted project ids, unique per plan. */
   key: string;
-  combo: Combo;
   plan: Plan;
+  /** Projects added / dropped compared with the best plan. */
+  added: number[];
+  removed: number[];
 }
 
-/** Every combination of titles, best first for the chosen mode. */
-export function rankCombos(data: PlannerData, mode: Mode): Ranked[] {
-  const combos = data.variants[String(data.full_mask)] ?? {};
+/** Most solutions shown at once: they must fit on one line. */
+export const MAX_SOLUTIONS = 12;
+
+const planKey = (plan: Plan) => [...plan.ids].sort((a, b) => a - b).join(",");
+
+/** Every distinct plan found for one combination of titles, best first. */
+export function rankPlans(combo: Combo | undefined, mode: Mode): Ranked[] {
+  if (!combo) {
+    return [];
+  }
+  const pool = [combo[mode], ...(combo.alts ?? []), combo.days, combo.projects];
+  const unique = new Map<string, Plan>();
+  for (const plan of pool) {
+    const key = planKey(plan);
+    if (plan.feasible && !unique.has(key)) {
+      unique.set(key, plan);
+    }
+  }
   const primary = (p: Plan) => (mode === "days" ? p.days : p.n);
   const secondary = (p: Plan) => (mode === "days" ? p.n : p.days);
-  return Object.entries(combos)
-    .map(([key, combo]) => ({ key, combo, plan: combo[mode] }))
-    .sort((a, b) => {
-      if (a.plan.feasible !== b.plan.feasible) {
-        return a.plan.feasible ? -1 : 1;
-      }
-      return (
-        primary(a.plan) - primary(b.plan) ||
-        secondary(a.plan) - secondary(b.plan)
-      );
-    });
-}
-
-/** "rncp6-1+rncp7-1" -> "61·71"; the four titles -> "All 4". */
-export function comboShort(key: string): string {
-  const parts = key.split("+");
-  if (parts.length === TITLE_KEYS.length) {
-    return "All 4";
-  }
-  return parts.map((part) => part.replace(/rncp(\d)-(\d)/, "$1$2")).join("·");
+  const sorted = [...unique]
+    .sort(
+      ([, a], [, b]) =>
+        primary(a) - primary(b) || secondary(a) - secondary(b) || a.xp - b.xp,
+    )
+    .slice(0, MAX_SOLUTIONS);
+  const best = new Set(sorted[0]?.[1].ids ?? []);
+  const bestKey = planKey(combo[mode]);
+  return sorted.map(([key, plan]) => {
+    const ids = new Set(plan.ids);
+    return {
+      key,
+      // Only the optimizer's answer carries a proof; in "projects" mode it
+      // extends to any plan with the same, proven minimal, project count.
+      plan:
+        key === bestKey ||
+        (mode === "projects" &&
+          combo.projects.proven &&
+          plan.n === combo.projects.n)
+          ? { ...plan, proven: combo[mode].proven }
+          : { ...plan, proven: false },
+      added: plan.ids.filter((id) => !best.has(id)),
+      removed: [...best].filter((id) => !ids.has(id)),
+    };
+  });
 }
 
 /** Shared by the comparison table and the bottom bar so their columns line up. */
 export function comboColumns(count: number): string {
   return `minmax(20rem,1fr) repeat(${count}, minmax(0,4.25rem))`;
+}
+
+/** "+rainfall +zappy −gomoku" */
+export function diffText(
+  added: number[],
+  removed: number[],
+  names: (id: number) => string,
+): string {
+  return [
+    ...added.map((id) => `+${names(id)}`),
+    ...removed.map((id) => `−${names(id)}`),
+  ].join(" ");
 }

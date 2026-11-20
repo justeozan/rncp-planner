@@ -3,7 +3,7 @@
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import { InfoIcon, TriangleAlertIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { type Mode, comboKey, formatXp, rankCombos } from "./format";
+import { type Mode, comboKey, formatXp, rankPlans } from "./format";
 import { Matrix } from "./matrix";
 import { Path } from "./path";
 import { Segmented } from "./segmented";
@@ -43,6 +43,9 @@ export function Planner({
   );
   const [mode, setMode] = useState<Mode>(initial.mode);
   const [view, setView] = useState<View>(initial.view);
+  // Plan picked in the bottom bar; reset to the best one when the titles or
+  // the objective change.
+  const [picked, setPicked] = useState<string | null>(null);
 
   // Keep the URL shareable without triggering navigations.
   useEffect(() => {
@@ -63,6 +66,7 @@ export function Planner({
   }, [selected, mode, view]);
 
   const toggle = (key: TitleKey) => {
+    setPicked(null);
     setSelected((current) => {
       if (!current.includes(key)) {
         return [...current, key];
@@ -70,22 +74,29 @@ export function Planner({
       return current.length > 1 ? current.filter((k) => k !== key) : current;
     });
   };
-  const pick = (key: string) => setSelected(key.split("+") as TitleKey[]);
+  const changeMode = (next: Mode) => {
+    setPicked(null);
+    setMode(next);
+  };
 
   const combos = data.variants[String(data.full_mask)] ?? {};
   const selectedKey = comboKey(selected);
   const combo = combos[selectedKey];
-  const plan = combo?.[mode];
-  const ranked = rankCombos(data, mode);
+  const ranked = rankPlans(combo, mode);
+  const best = ranked[0]?.plan ?? combo?.[mode];
+  const current = ranked.find(({ key }) => key === picked) ?? ranked[0];
+  const plan = current?.plan ?? best;
+  const names = (id: number) => data.projects[String(id)]?.n ?? String(id);
 
   const delta: Partial<Record<TitleKey, number>> = {};
-  if (plan?.feasible) {
+  if (best?.feasible) {
     for (const key of TITLE_KEYS) {
-      const next = combos[comboKey([...selected, key])]?.[mode];
+      const next = rankPlans(combos[comboKey([...selected, key])], mode)[0]
+        ?.plan;
       if (!selected.includes(key) && next?.feasible) {
         delta[key] = Math.max(
           0,
-          Math.round(mode === "days" ? next.days - plan.days : next.n - plan.n),
+          Math.round(mode === "days" ? next.days - best.days : next.n - best.n),
         );
       }
     }
@@ -129,13 +140,19 @@ export function Planner({
                 {Math.round(plan.days)}
               </span>{" "}
               days
-              {!plan.proven && (
-                <span
-                  className="ml-1.5 text-xs"
-                  title="Best plan found within the search budget; a slightly shorter one is not ruled out"
-                >
-                  best found
+              {current && current !== ranked[0] ? (
+                <span className="ml-1.5 text-xs">
+                  plan #{ranked.indexOf(current) + 1}
                 </span>
+              ) : (
+                !plan.proven && (
+                  <span
+                    className="ml-1.5 text-xs"
+                    title="Best plan found within the search budget; a slightly shorter one is not ruled out"
+                  >
+                    best found
+                  </span>
+                )
               )}
             </span>
             <span>
@@ -151,15 +168,13 @@ export function Planner({
         )}
       </div>
 
-      {view === "plan" && (
-        <TitlePicker
-          titles={data.titles}
-          selected={selected}
-          delta={delta}
-          unit={mode === "days" ? "d" : "pj"}
-          onToggle={toggle}
-        />
-      )}
+      <TitlePicker
+        titles={data.titles}
+        selected={selected}
+        delta={delta}
+        unit={mode === "days" ? "d" : "pj"}
+        onToggle={toggle}
+      />
 
       {plan?.feasible ? (
         view === "plan" ? (
@@ -174,8 +189,8 @@ export function Planner({
             <div className="md:absolute md:inset-0 md:flex md:flex-col">
               <Matrix
                 ranked={ranked}
-                selectedKey={selectedKey}
-                onPick={pick}
+                selectedKey={current?.key ?? ""}
+                onPick={setPicked}
                 data={data}
               />
             </div>
@@ -193,10 +208,11 @@ export function Planner({
 
       <SolutionsBar
         ranked={ranked}
+        names={names}
         mode={mode}
-        onMode={setMode}
-        selectedKey={selectedKey}
-        onPick={pick}
+        onMode={changeMode}
+        selectedKey={current?.key ?? ""}
+        onPick={setPicked}
       />
     </div>
   );

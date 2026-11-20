@@ -35,6 +35,8 @@ export interface Combo {
   kind: "single" | "pair" | "triple" | "quad";
   projects: Plan;
   days: Plan;
+  /** Other valid plans found by banning projects of the best ones. */
+  alts?: Plan[];
 }
 
 export interface Chain {

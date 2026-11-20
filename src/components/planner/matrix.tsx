@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { CSSProperties } from "react";
-import { type Ranked, comboColumns, comboShort, formatXp } from "./format";
+import { type Ranked, comboColumns, diffText, formatXp } from "./format";
 import type { PlannerData } from "./types";
 
 const GOLD_DOT = "bg-[#b0954c]";
@@ -15,9 +15,7 @@ interface MatrixProps {
 /** Every project used by at least one plan (rows) against every plan, best
  * first (columns, aligned with the bottom bar). */
 export function Matrix({ ranked, selectedKey, onPick, data }: MatrixProps) {
-  const plans = ranked.map(
-    ({ plan }) => new Set(plan.feasible ? plan.ids : []),
-  );
+  const plans = ranked.map(({ plan }) => new Set(plan.ids));
   const count = new Map<number, number>();
   for (const ids of plans) {
     for (const id of ids) {
@@ -47,7 +45,7 @@ export function Matrix({ ranked, selectedKey, onPick, data }: MatrixProps) {
       <div className="contents">
         <div className="flex items-end gap-2 border-b pb-1 text-muted-foreground">
           <span className="min-w-0 grow truncate">
-            {rows.length} projects · columns = plans below
+            {total} plans · {rows.length} projects · columns = plans below
           </span>
           <span className="hidden w-10 min-[1400px]:block">Cat.</span>
           <span className="hidden w-10 text-right md:block">XP</span>
@@ -59,12 +57,12 @@ export function Matrix({ ranked, selectedKey, onPick, data }: MatrixProps) {
             /{total}
           </span>
         </div>
-        {ranked.map(({ key, plan }, i) => (
+        {ranked.map(({ key, plan, added, removed }, i) => (
           <button
             key={key}
             type="button"
             onClick={() => onPick(key)}
-            title={`${comboShort(key)} · ${Math.round(plan.days)} days · ${plan.n} projects`}
+            title={`Plan ${i + 1}: ${Math.round(plan.days)} days · ${plan.n} projects${i > 0 ? `\n${diffText(added, removed, (id) => data.projects[String(id)]?.n ?? String(id))}` : ""}`}
             className={cn(
               "cursor-pointer border-b pb-1 text-center tabular-nums",
               i === sel

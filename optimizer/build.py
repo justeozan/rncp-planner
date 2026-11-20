@@ -51,9 +51,10 @@ def _dataset(off):
 
 
 def _job(task):
-    mask, off, combo, obj, base_xp, done, budget = task
+    mask, off, combo, obj, base_xp, done, budget, *rest = task
+    banned = frozenset(rest[0]) if rest else frozenset()
     ds = _dataset(off)
-    p = pl.solve_combo(ds, combo, base_xp, set(done), obj, budget)
+    p = pl.solve_combo(ds, combo, base_xp, set(done), obj, budget, banned)
     return (mask, "+".join(combo), obj, {
         "feasible": p["feasible"], "n": p["n"], "units": p["units_n"],
         "days": round(p["days"]), "xp": p["xp"], "proven": p["proven"],
@@ -106,7 +107,89 @@ def collect(chains, base_xp, done, args):
                 fixed += 1
     if fixed:
         print(f"  ({fixed} plans 'min temps' remplaces par le plan 'min projets')")
+    if args.alternatives:
+        full = str((1 << len(chains)) - 1)
+        alternatives(variants[full], (),
+                     base_xp, done, args)
     return variants
+
+
+def _banned_for(ds, rows):
+    out = set()
+    for r in rows:
+        out |= set(ds.bundles.get(r, (r,)))
+    return tuple(sorted(out))
+
+
+def alternatives(combos, off, base_xp, done, args):
+    """Autres plans valides pour chaque combinaison : on interdit tour a tour
+    un projet des meilleurs plans et on relance la recherche (deux niveaux).
+    Les plans distincts sont gardes dans `alts` ; l'interface les trie selon
+    le mode (jours ou nombre de projets)."""
+    ds = pl.Dataset(time_model=args.time_model)
+    found = {}   # key -> {frozenset(ids): plan}
+    for key, row in combos.items():
+        found[key] = {}
+        for obj in ("projects", "days"):
+            plan = row[obj]
+            if plan["feasible"]:
+                found[key][frozenset(plan["ids"])] = dict(plan, banned=[])
+
+    def run(level_tasks, label):
+        if not level_tasks:
+            return
+        level_tasks.sort(key=lambda t: len(t[2]), reverse=True)
+        print(f"  alternatives {label} : {len(level_tasks)} recherches", flush=True)
+        with ProcessPoolExecutor(max_workers=args.workers, initializer=_init,
+                                 initargs=(args.time_model,)) as ex:
+            for (_m, key, _o, res), task in zip(ex.map(_job, level_tasks), level_tasks):
+                if res["feasible"]:
+                    res["proven"] = False
+                    res["banned"] = list(task[7])
+                    found[key].setdefault(frozenset(res["ids"]), res)
+
+    def tasks_from(key, plans, seen):
+        combo = tuple(combos[key]["combo"])
+        out = []
+        for plan in plans:
+            for r in plan["ids"]:
+                banned = tuple(sorted(set(plan.get("banned", [])) | set(_banned_for(ds, [r]))))
+                if banned in seen:
+                    continue
+                seen.add(banned)
+                for obj in ("projects", "days"):
+                    out.append((0, off, combo, obj, base_xp, tuple(sorted(done)),
+                                args.alt_budget if obj == "projects" else args.alt_days_budget,
+                                banned))
+        return out
+
+    seen = {k: set() for k in combos}
+    lvl1 = []
+    for key in combos:
+        lvl1 += tasks_from(key, list(found[key].values()), seen[key])
+    run(lvl1, "niveau 1")
+
+    lvl2 = []
+    for key in combos:
+        if len(found[key]) >= args.alternatives:
+            continue
+        alts = sorted((p for p in found[key].values() if p["banned"]),
+                      key=lambda p: (p["n"], p["days"]))[:3]
+        lvl2 += tasks_from(key, alts, seen[key])
+    run(lvl2, "niveau 2")
+
+    for key, row in combos.items():
+        plans = list(found[key].values())
+        by_days = sorted(plans, key=lambda p: (p["days"], p["n"]))
+        by_n = sorted(plans, key=lambda p: (p["n"], p["days"]))
+        keep, ids = [], set()
+        for p in by_days[:args.alternatives] + by_n[:args.alternatives]:
+            k = frozenset(p["ids"])
+            if k not in ids:
+                ids.add(k)
+                keep.append({k2: v for k2, v in p.items() if k2 != "banned"})
+        row["alts"] = keep
+        print(f"  {key:<34} {len(plans):>3} plans distincts, {len(keep)} gardes")
 
 
 def row_id(ds, pid):
@@ -131,6 +214,8 @@ def project_table(ds, variants):
         for row in v.values():
             for obj in ("projects", "days"):
                 used |= set(row[obj]["ids"])
+            for alt in row.get("alts", []):
+                used |= set(alt["ids"])
     for t in ds.titles.values():
         for o in t["options"]:
             used |= set(pool_rows(ds, o["pool"]))
@@ -194,6 +279,10 @@ def main():
     ap.add_argument("--days-budget", type=int, default=400_000)
     ap.add_argument("--no-variants", action="store_true",
                     help="ne calculer que le reglage ou toutes les chaines sont actives")
+    ap.add_argument("--alternatives", type=int, default=12,
+                    help="plans alternatifs gardes par combinaison et par mode (0 = aucun)")
+    ap.add_argument("--alt-budget", type=int, default=600_000)
+    ap.add_argument("--alt-days-budget", type=int, default=150_000)
     ap.add_argument("--workers", type=int, default=os.cpu_count() or 4)
     ap.add_argument("--time-model", choices=("clamped", "xp", "raw"), default="clamped")
     ap.add_argument("--out", default=os.path.normpath(

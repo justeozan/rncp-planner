@@ -4,23 +4,25 @@ import {
   type Mode,
   type Ranked,
   comboColumns,
-  comboShort,
+  diffText,
   formatXp,
 } from "./format";
 import { Segmented } from "./segmented";
 
 interface SolutionsBarProps {
   ranked: Ranked[];
+  names: (id: number) => string;
   mode: Mode;
   onMode: (mode: Mode) => void;
   selectedKey: string;
   onPick: (key: string) => void;
 }
 
-/** Bottom bar: the objective on the left, every combination best first on
- * the right (same columns as the comparison table). */
+/** Bottom bar: the objective on the left, the plans found for the chosen
+ * titles best first on the right (same columns as the comparison table). */
 export function SolutionsBar({
   ranked,
+  names,
   mode,
   onMode,
   selectedKey,
@@ -41,7 +43,7 @@ export function SolutionsBar({
         onChange={onMode}
       />
       <ol className="grid grid-cols-5 gap-1 md:contents">
-        {ranked.map(({ key, plan }) => {
+        {ranked.map(({ key, plan, added, removed }, i) => {
           const active = key === selectedKey;
           const days = `${Math.round(plan.days)} d`;
           const projects = `${plan.n} pj`;
@@ -53,15 +55,10 @@ export function SolutionsBar({
               <button
                 type="button"
                 aria-pressed={active}
-                disabled={!plan.feasible}
                 onClick={() => onPick(key)}
-                title={
-                  plan.feasible
-                    ? `${key.split("+").join(" + ")}\n${Math.round(plan.days)} days · ${plan.n} projects · ${formatXp(plan.xp)} XP${plan.proven ? "" : "\nBest found, not proven optimal"}`
-                    : `${key}: no path`
-                }
+                title={`Plan ${i + 1}: ${Math.round(plan.days)} days · ${plan.n} projects · ${formatXp(plan.xp)} XP${i > 0 ? `\nvs plan 1: ${diffText(added, removed, names)}` : ""}`}
                 className={cn(
-                  "flex w-full min-w-0 cursor-pointer flex-col items-center rounded-md px-1 py-0.5 leading-tight transition-colors disabled:cursor-default disabled:opacity-40 md:mx-auto md:w-[calc(100%-0.25rem)]",
+                  "flex w-full min-w-0 cursor-pointer flex-col items-center rounded-md px-1 py-0.5 leading-tight transition-colors md:mx-auto md:w-[calc(100%-0.25rem)]",
                   active
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-accent",
@@ -75,13 +72,13 @@ export function SolutionsBar({
                       : "text-muted-foreground",
                   )}
                 >
-                  {comboShort(key)}
+                  #{i + 1}
                 </span>
                 <span className="font-semibold text-sm tabular-nums">
-                  {plan.feasible ? (mode === "days" ? days : projects) : "—"}
+                  {mode === "days" ? days : projects}
                 </span>
                 <span className="text-[10px] tabular-nums opacity-70">
-                  {plan.feasible ? (mode === "days" ? projects : days) : ""}
+                  {mode === "days" ? projects : days}
                 </span>
               </button>
             </li>

@@ -342,7 +342,7 @@ class Constraint:
         self.label, self.kind, self.need = label, kind, need
 
 
-def build_slots(ds, done):
+def build_slots(ds, done, banned=frozenset()):
     """Copie les groupes en retirant ce qui est deja valide.
 
     Cout d'un choix = nombre de projets a valider. Une piscine compte pour 1 :
@@ -357,6 +357,8 @@ def build_slots(ds, done):
         for ch in g["choices"]:
             ids = tuple(i for i in ch["ids"] if i not in done)
             if ch["ids"] and not ids:
+                continue
+            if banned and not banned.isdisjoint(ids):
                 continue
             if ids in seen:
                 continue
@@ -886,13 +888,15 @@ _INFEASIBLE = {"feasible": False, "units": [], "projects": [], "rows": [], "n": 
                "proven": True, "days_proven": True, "checks": []}
 
 
-def solve_combo(ds, combo, base_xp, done, objective, budget=400_000):
+def solve_combo(ds, combo, base_xp, done, objective, budget=400_000,
+                banned=frozenset()):
     """objective='projects' : nombre de projets minimal (prouve), puis le plan
     le plus court a ce nombre -> resultat stable et reproductible.
     objective='days'       : duree totale minimale, sans limite de nombre.
+    banned : projets interdits, pour chercher des plans alternatifs.
     """
     def fresh(objective=None, cap=None):
-        sl = build_slots(ds, done)
+        sl = build_slots(ds, done, banned)
         if objective is not None:
             cons0 = build_constraints(ds, combo, sl, base_xp, done)
             sl = prune_fillers(ds, combo, sl, objective, cap)
@@ -901,14 +905,14 @@ def solve_combo(ds, combo, base_xp, done, objective, budget=400_000):
 
     def probe_ub():
         """Nombre de projets d'une solution gloutonne : majorant de l'optimum."""
-        sl = build_slots(ds, done)
+        sl = build_slots(ds, done, banned)
         cons = build_constraints(ds, combo, sl, base_xp, done)
         sv = Solver(sl, cons, "projects", 1)
         sv._greedy()
         return int(sv.best_cost[0]) if sv.best is not None else None
 
     if objective == "days":
-        seed = solve_combo(ds, combo, base_xp, done, "projects", budget // 4)
+        seed = solve_combo(ds, combo, base_xp, done, "projects", budget // 4, banned)
         sl, cons = fresh()
         sv = Solver(sl, cons, "days", budget)
         if seed.get("feasible"):
