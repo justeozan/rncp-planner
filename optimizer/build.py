@@ -167,6 +167,9 @@ def main():
     ap.add_argument("--time-model", choices=("clamped", "xp", "raw"), default="clamped")
     ap.add_argument("--out", default=os.path.normpath(
         os.path.join(HERE, "..", "public", "planner.html")))
+    ap.add_argument("--json-out", default=os.path.normpath(
+        os.path.join(HERE, "..", "src", "data", "planner.json")),
+                    help="donnees lues par la page /planner du site Next.js")
     args = ap.parse_args()
 
     ds = pl.Dataset(time_model=args.time_model)
@@ -218,6 +221,10 @@ def main():
     with open(args.out, "w") as fh:
         fh.write(tpl.replace("/*__DATA__*/",
                              json.dumps(data, ensure_ascii=False, separators=(",", ":"))))
+    os.makedirs(os.path.dirname(args.json_out), exist_ok=True)
+    with open(args.json_out, "w") as fh:
+        json.dump(data, fh, ensure_ascii=False, separators=(",", ":"))
+    print(f"\n-> {args.json_out}")
     print(f"\n-> {args.out}  ({os.path.getsize(args.out) // 1024} Ko, "
           f"{time.time() - t0:.0f}s de calcul)")
 

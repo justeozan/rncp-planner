@@ -17,8 +17,9 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "42calculator",
-  description: "A calculator for the 42 curriculum",
+  title: "RNCP planner",
+  description:
+    "Plan the shortest path to the 42 RNCP titles: pick your titles, get the fewest projects or the shortest time.",
 };
 
 export default function RootLayout({
