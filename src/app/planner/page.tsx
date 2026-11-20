@@ -1,6 +1,5 @@
 import { Planner } from "@/components/planner/planner";
 import {
-  type Objective,
   type PlannerData,
   type PlannerInitialState,
   TITLE_KEYS,
@@ -35,13 +34,7 @@ function parseInitial(params: SearchParams): PlannerInitialState {
     .split(",")
     .filter((key): key is TitleKey => TITLE_KEYS.includes(key as TitleKey));
 
-  const by: Objective = first(params.by) === "days" ? "days" : "projects";
-
-  const chains = Number.parseInt(first(params.chains) ?? "", 10);
-  const mask =
-    !data.only_full && chains >= 0 && chains <= data.full_mask ? chains : null;
-
-  return { titles: titles.length > 0 ? titles : null, objective: by, mask };
+  return { titles: titles.length > 0 ? titles : null };
 }
 
 export default async function PlannerPage({
@@ -50,15 +43,15 @@ export default async function PlannerPage({
   const initial = parseInitial(await searchParams);
 
   return (
-    <main className="@container flex grow items-start justify-center p-4 md:p-12 lg:p-24">
+    <main className="@container flex grow items-start justify-center p-4">
       <Card className="@max-[1400px]:w-full @min-[1400px]:w-[1400px] bg-card/5 backdrop-blur-sm">
-        <CardHeader>
+        <CardHeader className="p-4 md:px-6">
           <CardTitle tag="h1">RNCP planner</CardTitle>
           <CardDescription>
-            The shortest list of projects to get the RNCP titles you want.
+            Pick your titles, get the fastest path.
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-4 md:p-6">
+        <CardContent className="p-4 pt-0 md:px-6">
           <Planner
             data={data}
             initial={initial}

@@ -1,5 +1,4 @@
 export type TitleKey = "rncp6-1" | "rncp6-2" | "rncp7-1" | "rncp7-2";
-export type Objective = "projects" | "days";
 
 export const TITLE_KEYS: TitleKey[] = [
   "rncp6-1",
@@ -88,6 +87,4 @@ export interface PlannerData {
 
 export interface PlannerInitialState {
   titles: TitleKey[] | null;
-  objective: Objective;
-  mask: number | null;
 }
