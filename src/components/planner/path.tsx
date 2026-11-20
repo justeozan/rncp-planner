@@ -2,7 +2,7 @@ import { CircleAlertIcon, CircleIcon } from "lucide-react";
 import { formatXp } from "./format";
 import type { Check, PlannerData, Project, TitleKey } from "./types";
 
-const SKIPPED_SHOWN = 3;
+const SKIPPED_SHOWN = 2;
 /** General conditions where listing every other project would only be noise. */
 const NO_SKIPPED = new Set(["Projet suite", "Projets de groupe"]);
 

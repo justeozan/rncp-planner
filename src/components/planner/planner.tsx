@@ -1,9 +1,13 @@
 "use client";
 
-import { TriangleAlertIcon } from "lucide-react";
+import { CardDescription, CardTitle } from "@/components/ui/card";
+import { InfoIcon, TriangleAlertIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { comboKey, formatXp } from "./format";
+import { type Mode, comboKey, formatXp, rankCombos } from "./format";
+import { Matrix } from "./matrix";
 import { Path } from "./path";
+import { Segmented } from "./segmented";
+import { SolutionsBar } from "./solutions";
 import { TitlePicker } from "./title-picker";
 import {
   type PlannerData,
@@ -13,6 +17,8 @@ import {
 } from "./types";
 
 const DAYS_PER_MONTH = 30.4;
+
+type View = PlannerInitialState["view"];
 
 /** Default selection: the fastest single title. */
 function fastestSingle(data: PlannerData): TitleKey {
@@ -35,12 +41,26 @@ export function Planner({
   const [selected, setSelected] = useState<TitleKey[]>(
     () => initial.titles ?? [fastestSingle(data)],
   );
+  const [mode, setMode] = useState<Mode>(initial.mode);
+  const [view, setView] = useState<View>(initial.view);
 
   // Keep the URL shareable without triggering navigations.
   useEffect(() => {
-    const titles = TITLE_KEYS.filter((k) => selected.includes(k)).join(",");
-    window.history.replaceState(null, "", `?titles=${titles}`);
-  }, [selected]);
+    const params = new URLSearchParams({
+      titles: TITLE_KEYS.filter((k) => selected.includes(k)).join(","),
+    });
+    if (mode === "projects") {
+      params.set("mode", mode);
+    }
+    if (view === "compare") {
+      params.set("view", view);
+    }
+    window.history.replaceState(
+      null,
+      "",
+      `?${params.toString().replaceAll("%2C", ",")}`,
+    );
+  }, [selected, mode, view]);
 
   const toggle = (key: TitleKey) => {
     setSelected((current) => {
@@ -50,17 +70,23 @@ export function Planner({
       return current.length > 1 ? current.filter((k) => k !== key) : current;
     });
   };
+  const pick = (key: string) => setSelected(key.split("+") as TitleKey[]);
 
   const combos = data.variants[String(data.full_mask)] ?? {};
-  const combo = combos[comboKey(selected)];
-  const plan = combo?.days;
+  const selectedKey = comboKey(selected);
+  const combo = combos[selectedKey];
+  const plan = combo?.[mode];
+  const ranked = rankCombos(data, mode);
 
   const delta: Partial<Record<TitleKey, number>> = {};
   if (plan?.feasible) {
     for (const key of TITLE_KEYS) {
-      const next = combos[comboKey([...selected, key])]?.days;
+      const next = combos[comboKey([...selected, key])]?.[mode];
       if (!selected.includes(key) && next?.feasible) {
-        delta[key] = Math.max(0, Math.round(next.days - plan.days));
+        delta[key] = Math.max(
+          0,
+          Math.round(mode === "days" ? next.days - plan.days : next.n - plan.n),
+        );
       }
     }
   }
@@ -68,54 +94,93 @@ export function Planner({
   const level = Math.max(...selected.map((key) => data.titles[key].level));
   const events = Math.max(...selected.map((key) => data.titles[key].events));
   const done = data.baseline.done.map((project) => project.n).join(", ");
+  const notes = [
+    `Covers level ${level} and every condition; prerequisites needed to unlock a project are counted.`,
+    `Not included: ${events} events to attend.`,
+    `Rules: gcc.42.fr, Nov. 2026. From level ${data.baseline.level}${done ? ` (${done} done)` : ""}, ~${data.meta.rate} days per 1000 XP.`,
+  ].join("\n");
 
   return (
-    <div className="space-y-4">
-      <TitlePicker
-        titles={data.titles}
-        selected={selected}
-        delta={delta}
-        onToggle={toggle}
-      />
+    <div className="flex min-h-0 grow flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div className="space-y-1">
+          <CardTitle tag="h1">RNCP planner</CardTitle>
+          <CardDescription>
+            Pick your titles, get the{" "}
+            {mode === "days" ? "fastest path" : "fewest projects"}.
+          </CardDescription>
+        </div>
+        <Segmented
+          label="View"
+          value={view}
+          options={[
+            ["plan", "Plan"],
+            ["compare", "Compare"],
+          ]}
+          onChange={setView}
+        />
+        {plan?.feasible && (
+          <p
+            className="ml-auto flex items-baseline gap-x-3 text-muted-foreground"
+            title={notes}
+          >
+            <span>
+              <span className="font-semibold text-3xl text-foreground tracking-tight">
+                {Math.round(plan.days)}
+              </span>{" "}
+              days
+              {!plan.proven && (
+                <span
+                  className="ml-1.5 text-xs"
+                  title="Best plan found within the search budget; a slightly shorter one is not ruled out"
+                >
+                  best found
+                </span>
+              )}
+            </span>
+            <span>
+              ≈ {Math.round(plan.days / DAYS_PER_MONTH)} months ·{" "}
+              <span className="text-foreground">{plan.n} projects</span> ·{" "}
+              {formatXp(plan.xp)} XP
+            </span>
+            <InfoIcon
+              aria-label={notes}
+              className="size-3.5 shrink-0 self-center"
+            />
+          </p>
+        )}
+      </div>
+
+      {view === "plan" && (
+        <TitlePicker
+          titles={data.titles}
+          selected={selected}
+          delta={delta}
+          unit={mode === "days" ? "d" : "pj"}
+          onToggle={toggle}
+        />
+      )}
 
       {plan?.feasible ? (
-        <>
-          <div className="space-y-1">
-            <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-              <span>
-                <span className="font-semibold text-4xl tracking-tight">
-                  {Math.round(plan.days)}
-                </span>{" "}
-                <span className="text-muted-foreground">days</span>
-                {!plan.proven && (
-                  <span
-                    className="ml-1.5 text-muted-foreground text-xs"
-                    title="Best plan found within the search budget; a slightly shorter one is not ruled out"
-                  >
-                    best found
-                  </span>
-                )}
-              </span>
-              <span className="text-muted-foreground">
-                ≈ {Math.round(plan.days / DAYS_PER_MONTH)} months · {plan.n}{" "}
-                projects · {formatXp(plan.xp)} XP
-              </span>
-            </p>
-            <p className="text-muted-foreground text-xs">
-              Covers level {level} and every condition below; prerequisites
-              needed to unlock a project are counted. Not included: {events}{" "}
-              events to attend. Rules: gcc.42.fr, Nov. 2026. From level{" "}
-              {data.baseline.level}
-              {done && ` (${done} done)`}, ~{data.meta.rate} days per 1000 XP.
-            </p>
-          </div>
+        view === "plan" ? (
           <Path
             ids={plan.ids}
             checks={plan.checks}
             selected={combo.combo}
             data={data}
           />
-        </>
+        ) : (
+          <div className="relative min-h-[28rem] grow">
+            <div className="md:absolute md:inset-0 md:flex md:flex-col">
+              <Matrix
+                ranked={ranked}
+                selectedKey={selectedKey}
+                onPick={pick}
+                data={data}
+              />
+            </div>
+          </div>
+        )
       ) : (
         <div className="flex items-start gap-3 rounded-md border border-destructive/50 p-4 text-sm">
           <TriangleAlertIcon
@@ -125,6 +190,14 @@ export function Planner({
           <p>No path found for this combination.</p>
         </div>
       )}
+
+      <SolutionsBar
+        ranked={ranked}
+        mode={mode}
+        onMode={setMode}
+        selectedKey={selectedKey}
+        onPick={pick}
+      />
     </div>
   );
 }

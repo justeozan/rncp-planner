@@ -8,8 +8,9 @@ import { type PlannerData, TITLE_KEYS, type TitleKey } from "./types";
 interface TitlePickerProps {
   titles: PlannerData["titles"];
   selected: TitleKey[];
-  /** Extra days if this title is added to the selection (unselected only). */
+  /** Extra days or projects if this title is added (unselected only). */
   delta: Partial<Record<TitleKey, number>>;
+  unit: "d" | "pj";
   onToggle: (key: TitleKey) => void;
 }
 
@@ -17,6 +18,7 @@ export function TitlePicker({
   titles,
   selected,
   delta,
+  unit,
   onToggle,
 }: TitlePickerProps) {
   return (
@@ -68,9 +70,9 @@ export function TitlePicker({
               extra !== undefined && (
                 <span
                   className="shrink-0 font-normal text-muted-foreground text-xs"
-                  title="Extra days if you add this title"
+                  title={`Extra ${unit === "d" ? "days" : "projects"} if you add this title`}
                 >
-                  +{extra} d
+                  +{extra} {unit}
                 </span>
               )
             )}

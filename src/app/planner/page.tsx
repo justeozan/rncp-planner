@@ -5,13 +5,7 @@ import {
   TITLE_KEYS,
   type TitleKey,
 } from "@/components/planner/types";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import plannerData from "@/data/planner.json";
 import type { Metadata } from "next";
 
@@ -34,7 +28,11 @@ function parseInitial(params: SearchParams): PlannerInitialState {
     .split(",")
     .filter((key): key is TitleKey => TITLE_KEYS.includes(key as TitleKey));
 
-  return { titles: titles.length > 0 ? titles : null };
+  return {
+    titles: titles.length > 0 ? titles : null,
+    mode: first(params.mode) === "projects" ? "projects" : "days",
+    view: first(params.view) === "compare" ? "compare" : "plan",
+  };
 }
 
 export default async function PlannerPage({
@@ -43,15 +41,9 @@ export default async function PlannerPage({
   const initial = parseInitial(await searchParams);
 
   return (
-    <main className="@container flex grow items-start justify-center p-4">
-      <Card className="@max-[1400px]:w-full @min-[1400px]:w-[1400px] bg-card/5 backdrop-blur-sm">
-        <CardHeader className="p-4 md:px-6">
-          <CardTitle tag="h1">RNCP planner</CardTitle>
-          <CardDescription>
-            Pick your titles, get the fastest path.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-4 pt-0 md:px-6">
+    <main className="@container flex grow justify-center p-4">
+      <Card className="@max-[1400px]:w-full @min-[1400px]:w-[1400px] flex flex-col bg-card/5 backdrop-blur-sm">
+        <CardContent className="flex grow flex-col p-4 pb-0 md:px-6">
           <Planner
             data={data}
             initial={initial}

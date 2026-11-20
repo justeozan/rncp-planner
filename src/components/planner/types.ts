@@ -92,4 +92,6 @@ export interface PlannerData {
 
 export interface PlannerInitialState {
   titles: TitleKey[] | null;
+  mode: "days" | "projects";
+  view: "plan" | "compare";
 }
