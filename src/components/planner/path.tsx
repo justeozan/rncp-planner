@@ -1,6 +1,4 @@
-import { Badge } from "@/components/ui/badge";
-import { CheckIcon, CircleAlertIcon } from "lucide-react";
-import { Fragment } from "react";
+import { CircleAlertIcon, CircleIcon } from "lucide-react";
 import { formatXp } from "./format";
 import type { Check, PlannerData, Project, TitleKey } from "./types";
 
@@ -138,124 +136,174 @@ function buildSections(
   return sections;
 }
 
-function ProjectRow({
-  project,
-  data,
-}: { project: Project; data: PlannerData }) {
-  const chain = project.ch;
-  const pre = (project.pre ?? [])
+const GOLD = "bg-[#b0954c] text-neutral-900";
+
+/** Short card titles, so the two bars fit next to them. */
+const SHORT: Record<string, string> = {
+  "Object Oriented Programming": "OOP",
+  "Functional programming": "Functional",
+  "Imperative programming": "Imperative",
+  "System administration": "SysAdmin",
+  "Artificial Intelligence": "AI",
+  "Web - Database": "Web · DB",
+  "Experiences pro": "Internships",
+};
+
+function names(ids: number[] | undefined, data: PlannerData): string[] {
+  return (ids ?? [])
     .map((id) => data.projects[String(id)]?.n)
-    .filter(Boolean);
+    .filter((name): name is string => Boolean(name));
+}
+
+function ChosenRow({ project, data }: { project: Project; data: PlannerData }) {
+  const chain = project.ch;
+  const pre = names(project.pre, data);
+  const tip = [
+    `${formatXp(project.xp)} XP · ${project.d} days`,
+    project.sub ? `Piscine: ${project.sub} modules` : "",
+    chain && chain[1] > 1
+      ? `Step ${chain[1]}/${chain[2]} of ${chain[0]}: previous steps included`
+      : "",
+    pre.length > 0 ? `Unlocked by ${pre.join(", ")}` : "",
+    project.t.includes("0 validation")
+      ? "Never validated: may be closed on your campus"
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
   return (
-    <li className="flex items-center gap-2 py-0.5 text-sm">
-      <span className="min-w-0 truncate">{project.n}</span>
+    <li
+      title={tip}
+      className={`flex items-center gap-2.5 rounded-lg px-3 py-1 text-sm ${GOLD}`}
+    >
+      <CircleIcon
+        aria-hidden
+        className="size-4 shrink-0"
+      />
+      <span className="min-w-0 truncate font-medium">{project.n}</span>
       {project.t.includes("0 validation") && (
         <CircleAlertIcon
-          aria-label="Never validated: may be closed on your campus"
-          className="size-3.5 shrink-0 text-destructive"
-        >
-          <title>Never validated: may be closed on your campus</title>
-        </CircleAlertIcon>
+          aria-hidden
+          className="size-3.5 shrink-0"
+        />
       )}
-      {project.sub ? (
-        <Badge
-          variant="outline"
-          className="px-1.5 py-0 font-normal"
-          title={`Piscine: ${project.sub} modules`}
-        >
-          {project.sub} mod.
-        </Badge>
-      ) : null}
       {chain && chain[1] > 1 ? (
-        <Badge
-          variant="outline"
-          className="px-1.5 py-0 font-normal"
-          title={`Step ${chain[1]} of ${chain[2]}: the ${chain[1] - 1} previous ones are included in the time`}
-        >
-          {chain[0]} {chain[1]}/{chain[2]}
-        </Badge>
-      ) : pre.length > 0 ? (
-        <span
-          className="truncate text-muted-foreground text-xs"
-          title={`Unlocked by ${pre.join(", ")}`}
-        >
-          after {pre.join(", ")}
+        <span className="shrink-0 text-xs opacity-70">
+          {chain[1]}/{chain[2]}
         </span>
+      ) : pre.length > 0 && project.n.length + pre[0].length < 16 ? (
+        <span className="truncate text-xs opacity-70">after {pre[0]}</span>
       ) : null}
-      <span className="ml-auto shrink-0 whitespace-nowrap text-muted-foreground text-xs tabular-nums">
-        {formatXp(project.xp)} · {project.d} d
+      <span className="ml-auto shrink-0 tabular-nums">
+        {formatXp(project.xp)} xp
       </span>
     </li>
   );
 }
 
-function Meter({
-  have,
-  need,
-  unit,
-}: { have: number; need: number; unit: string }) {
-  const ok = have >= need;
+/** What taking this project instead would cost, as one stat. */
+function cost(
+  item: Entry,
+  section: Section,
+  taken: Set<number>,
+  data: PlannerData,
+): { label: string; tip: string } {
+  const missing = (item.project.pre ?? []).filter((id) => !taken.has(id));
+  if (missing.length > 0) {
+    return {
+      label: `+${missing.length} project${missing.length > 1 ? "s" : ""}`,
+      tip: `Needs ${names(missing, data).join(", ")} first`,
+    };
+  }
+  const pool = section.own.length > 0 ? section.own : section.shared;
+  const ref = pool.reduce<Entry | null>(
+    (low, e) => (low && low.project.xp <= e.project.xp ? low : e),
+    null,
+  );
+  if (ref && item.project.xp < ref.project.xp) {
+    return {
+      label: `−${formatXp(ref.project.xp - item.project.xp)} xp`,
+      tip: `${formatXp(item.project.xp)} XP, less than ${ref.project.n}`,
+    };
+  }
+  const extra = ref ? item.project.d - ref.project.d : item.project.d;
+  return {
+    label: `+${Math.max(extra, 1)} d`,
+    tip: ref
+      ? `${item.project.d} days, ${extra} more than ${ref.project.n}`
+      : `${item.project.d} days`,
+  };
+}
+
+function SkippedRows({
+  section,
+  taken,
+  data,
+}: { section: Section; taken: Set<number>; data: PlannerData }) {
+  if (section.skipped.length === 0) {
+    return null;
+  }
+  const shown = section.skipped.slice(0, SKIPPED_SHOWN);
+  const rest = section.skipped.slice(SKIPPED_SHOWN);
   return (
-    <span
-      className={`inline-flex items-center gap-0.5 tabular-nums ${ok ? "text-foreground" : "text-destructive"}`}
-    >
-      {ok && (
-        <CheckIcon
-          aria-hidden
-          className="size-3"
-        />
+    <>
+      {shown.map((item) => {
+        const c = cost(item, section, taken, data);
+        return (
+          <li
+            key={item.id}
+            title={`Not in the plan · ${c.tip}`}
+            className="flex items-center gap-2.5 px-3 py-0.5 text-sm"
+          >
+            <CircleIcon
+              aria-hidden
+              className="size-4 shrink-0 text-muted-foreground"
+            />
+            <span className="min-w-0 truncate">{item.project.n}</span>
+            <span className="ml-auto shrink-0 text-red-400 tabular-nums">
+              {c.label}
+            </span>
+          </li>
+        );
+      })}
+      {rest.length > 0 && (
+        <li
+          className="px-3 pl-[2.375rem] text-muted-foreground text-xs"
+          title={rest.map((item) => item.project.n).join("\n")}
+        >
+          +{rest.length} other projects
+        </li>
       )}
-      {unit === "XP" ? formatXp(have) : have}
-      <span className="text-muted-foreground">
-        /{unit === "XP" ? formatXp(need) : need} {unit}
-      </span>
-    </span>
+    </>
   );
 }
 
-function Skipped({ items, data }: { items: Entry[]; data: PlannerData }) {
-  if (items.length === 0) {
-    return null;
-  }
-  const shown = items.slice(0, SKIPPED_SHOWN);
-  const rest = items.slice(SKIPPED_SHOWN);
-  const tip = (item: Entry) => {
-    const pre = (item.project.pre ?? [])
-      .map((id) => data.projects[String(id)]?.n)
-      .filter(Boolean);
-    return `Not done: −${formatXp(item.project.xp)} XP, −1 project, saves ${item.project.d} days${
-      pre.length ? ` · needs ${pre.join(", ")} first` : ""
-    }`;
-  };
+function Bar({
+  have,
+  need,
+  unit,
+}: { have: number; need: number; unit: "xp" | "pj" }) {
+  const ok = have >= need;
+  const pct = need > 0 ? Math.min(100, (have / need) * 100) : 100;
+  const value =
+    unit === "xp"
+      ? `${formatXp(have)} / ${formatXp(need)} XP`
+      : `${have} / ${need} projects`;
   return (
-    <p className="mt-1.5 break-words border-t border-dashed pt-1.5 text-muted-foreground text-xs leading-relaxed">
-      <span className="mr-1">Skipped</span>
-      {shown.map((item, i) => (
-        <Fragment key={item.id}>
-          <span
-            title={tip(item)}
-            className="whitespace-nowrap"
-          >
-            {item.project.n.length > 22
-              ? `${item.project.n.slice(0, 20)}…`
-              : item.project.n}{" "}
-            <span className="tabular-nums opacity-70">
-              −{formatXp(item.project.xp)}
-            </span>
-          </span>
-          {i < shown.length - 1 || rest.length > 0 ? " · " : ""}
-        </Fragment>
-      ))}
-      {rest.length > 0 && (
+    <span
+      className="flex min-w-0 flex-1 items-center gap-1.5"
+      title={value}
+    >
+      <span className="h-2.5 min-w-6 flex-1 overflow-hidden rounded-full bg-muted">
         <span
-          title={rest
-            .map((item) => `${item.project.n} −${formatXp(item.project.xp)}`)
-            .join("\n")}
-        >
-          +{rest.length} more
-        </span>
-      )}
-    </p>
+          className={`block h-full rounded-full ${ok ? "bg-[#b0954c]" : "bg-red-400"}`}
+          style={{ width: `${pct}%` }}
+        />
+      </span>
+      <span className="shrink-0 text-muted-foreground text-xs">
+        {unit === "pj" ? `${have}/${need}` : formatXp(have)} {unit}
+      </span>
+    </span>
   );
 }
 
@@ -277,78 +325,82 @@ export function Path({
   );
   const sections = all.filter((section) => !compact.includes(section));
 
+  const taken = new Set([
+    ...ids,
+    ...data.baseline.done.map((project) => project.id),
+  ]);
+
   return (
     <div className="gap-3 sm:columns-2 lg:columns-3 xl:columns-4">
       {sections.map((section) => (
         <section
           key={section.name}
-          className="mb-3 break-inside-avoid rounded-md border px-3 py-2"
+          className="mb-3 break-inside-avoid rounded-2xl border px-3 py-2.5"
         >
-          <h2 className="flex flex-wrap items-baseline justify-between gap-x-2">
-            <span className="truncate font-semibold text-sm">
-              {section.name}
+          <h2 className="mb-2 flex items-center gap-3 px-1">
+            <span
+              className="max-w-[45%] shrink-0 truncate font-semibold text-base"
+              title={section.name}
+            >
+              {SHORT[section.name] ?? section.name}
             </span>
             {section.pool.size > 0 && (
-              <span className="flex shrink-0 gap-2 text-xs">
+              <>
                 {section.need.xp > 0 && (
-                  <Meter
+                  <Bar
                     have={section.xp}
                     need={section.need.xp}
-                    unit="XP"
+                    unit="xp"
                   />
                 )}
-                <Meter
+                <Bar
                   have={section.n}
                   need={section.need.n}
-                  unit="proj."
+                  unit="pj"
                 />
-              </span>
+              </>
             )}
           </h2>
-          {section.own.length > 0 && (
-            <ul className="mt-1">
-              {section.own.map((item) => (
-                <ProjectRow
-                  key={item.id}
-                  project={item.project}
-                  data={data}
-                />
-              ))}
-            </ul>
-          )}
+          <ul className="space-y-1">
+            {section.own.map((item) => (
+              <ChosenRow
+                key={item.id}
+                project={item.project}
+                data={data}
+              />
+            ))}
+            <SkippedRows
+              section={section}
+              taken={taken}
+              data={data}
+            />
+          </ul>
           {section.shared.length > 0 && (
-            <p className="mt-0.5 truncate text-muted-foreground text-xs">
+            <p className="mt-1.5 truncate px-3 text-muted-foreground text-xs">
               Also counts:{" "}
               {section.shared.map((item) => item.project.n).join(", ")}
             </p>
           )}
-          <Skipped
-            items={section.skipped}
-            data={data}
-          />
         </section>
       ))}
       {compact.length > 0 && (
-        <section className="mb-3 break-inside-avoid space-y-0.5 rounded-md border px-3 py-2 text-xs">
+        <section className="mb-3 break-inside-avoid space-y-2 rounded-2xl border px-4 py-3">
           {compact.map((section) => (
-            <p
-              key={section.name}
-              className="flex items-baseline gap-2"
-            >
-              <span className="shrink-0 font-semibold text-sm">
-                {section.name}
-              </span>
-              <span className="min-w-0 truncate text-muted-foreground">
-                {section.shared.map((item) => item.project.n).join(", ")}
-              </span>
-              <span className="ml-auto shrink-0">
-                <Meter
+            <div key={section.name}>
+              <p className="flex items-center gap-3">
+                <span className="shrink-0 font-semibold text-sm">
+                  {section.name}
+                </span>
+                <Bar
                   have={section.n}
                   need={section.need.n}
-                  unit="proj."
+                  unit="pj"
                 />
-              </span>
-            </p>
+              </p>
+              <p className="truncate text-muted-foreground text-xs">
+                {section.shared.map((item) => item.project.n).join(", ")}
+              </p>
+            </div>
           ))}
         </section>
       )}
