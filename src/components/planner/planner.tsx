@@ -87,20 +87,18 @@ export function Planner({
                   {Math.round(plan.days)}
                 </span>{" "}
                 <span className="text-muted-foreground">days</span>
+                {!plan.proven && (
+                  <span
+                    className="ml-1.5 text-muted-foreground text-xs"
+                    title="Best plan found within the search budget; a slightly shorter one is not ruled out"
+                  >
+                    best found
+                  </span>
+                )}
               </span>
               <span className="text-muted-foreground">
-                ≈ {Math.round(plan.days / DAYS_PER_MONTH)} months ·{" "}
-                <span
-                  title={
-                    plan.proven
-                      ? undefined
-                      : "Upper bound: the solver did not prove a shorter list is impossible"
-                  }
-                >
-                  {plan.proven ? "" : "≤ "}
-                  {plan.n} projects
-                </span>{" "}
-                · {formatXp(plan.xp)} XP
+                ≈ {Math.round(plan.days / DAYS_PER_MONTH)} months · {plan.n}{" "}
+                projects · {formatXp(plan.xp)} XP
               </span>
             </p>
             <p className="text-muted-foreground text-xs">
