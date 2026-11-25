@@ -107,6 +107,8 @@ export function Planner({
   const done = data.baseline.done.map((project) => project.n).join(", ");
   const notes = [
     `Covers level ${level} and every condition; prerequisites needed to unlock a project are counted.`,
+    `XP counted at ${Math.round(data.meta.bonus * 100)} % (internships at 100 %): aim for the bonus on every project.`,
+    "Excluded: projects not on the Lyon holy graph and projects nobody has validated.",
     `Not included: ${events} events to attend.`,
     `Rules: gcc.42.fr, Nov. 2026. From level ${data.baseline.level}${done ? ` (${done} done)` : ""}, ~${data.meta.rate} days per 1000 XP.`,
   ].join("\n");

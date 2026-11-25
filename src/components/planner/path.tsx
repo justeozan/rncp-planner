@@ -5,6 +5,7 @@ import {
   ChevronRightIcon,
   CircleAlertIcon,
   CircleIcon,
+  UsersIcon,
   WavesLadderIcon,
 } from "lucide-react";
 import { useLayoutEffect, useState } from "react";
@@ -201,6 +202,29 @@ function ProjectName({ project }: { project: Project }) {
   );
 }
 
+const teamSize = ([min, max]: [number, number]) =>
+  min === max ? `${min}` : `${min}–${max}`;
+
+/** Team size imposed by the intra: you need teammates for this one. */
+function Team({ project }: { project: Project }) {
+  if (!project.tm) {
+    return null;
+  }
+  const size = teamSize(project.tm);
+  return (
+    <span
+      title={`Team project: ${size} students`}
+      className="flex shrink-0 items-center gap-0.5 text-xs opacity-80"
+    >
+      <UsersIcon
+        aria-label="Team project"
+        className="size-3.5"
+      />
+      {size}
+    </span>
+  );
+}
+
 function Piscine({ project }: { project: Project }) {
   if (!project.pi) {
     return null;
@@ -313,6 +337,7 @@ function PrerequisiteRow({
         )}
         <ProjectName project={project} />
         <Piscine project={project} />
+        <Team project={project} />
         {pre.length > 0 && (
           <Toggle
             open={open}
@@ -352,6 +377,7 @@ function ChosenRow({
     item.done ? "Already validated" : "",
     isSuper ? `Counts for ${counts.map(short).join(", ")}` : "",
     project.pi ? `Piscine${project.sub ? `: ${project.sub} modules` : ""}` : "",
+    project.tm ? `Team of ${teamSize(project.tm)} students` : "",
     chain && chain[1] > 1
       ? `Step ${chain[1]}/${chain[2]} of ${chain[0]}: previous steps included`
       : "",
@@ -381,6 +407,7 @@ function ChosenRow({
         )}
         <ProjectName project={project} />
         <Piscine project={project} />
+        <Team project={project} />
         {project.t.includes("0 validation") && (
           <CircleAlertIcon
             aria-hidden
@@ -492,6 +519,7 @@ function SkippedRow({
         />
         <ProjectName project={item.project} />
         <Piscine project={item.project} />
+        <Team project={item.project} />
         {pre.length > 0 && (
           <Toggle
             open={open}
@@ -734,6 +762,7 @@ export function Path({
                     )}
                     <ProjectName project={item.project} />
                     <Piscine project={item.project} />
+                    <Team project={item.project} />
                   </span>
                 ))}
               </p>

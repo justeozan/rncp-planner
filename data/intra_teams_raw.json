@@ -1,0 +1,1730 @@
+{
+ "1314": {
+  "slug": "42cursus-libft",
+  "name": "Libft",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1315": {
+  "slug": "minirt",
+  "name": "miniRT",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1316": {
+  "slug": "42cursus-ft_printf",
+  "name": "ft_printf",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1320": {
+  "slug": "exam-rank-02",
+  "name": "Exam Rank 02",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1321": {
+  "slug": "exam-rank-03",
+  "name": "Exam Rank 03",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1322": {
+  "slug": "exam-rank-04",
+  "name": "Exam Rank 04",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1323": {
+  "slug": "exam-rank-05",
+  "name": "Exam Rank 05",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1324": {
+  "slug": "exam-rank-06",
+  "name": "Exam Rank 06",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1326": {
+  "slug": "cub3d",
+  "name": "cub3d",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1327": {
+  "slug": "42cursus-get_next_line",
+  "name": "get_next_line",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1330": {
+  "slug": "libasm",
+  "name": "libasm",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1331": {
+  "slug": "42cursus-minishell",
+  "name": "minishell",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1332": {
+  "slug": "webserv",
+  "name": "webserv",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "1334": {
+  "slug": "42cursus-philosophers",
+  "name": "Philosophers",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1336": {
+  "slug": "ft_irc",
+  "name": "ft_irc",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "1337": {
+  "slug": "ft_transcendence",
+  "name": "ft_transcendence",
+  "st": 200,
+  "kind": "Group",
+  "min": 4,
+  "max": 5
+ },
+ "1338": {
+  "slug": "cpp-module-00",
+  "name": "CPP Module 00",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1339": {
+  "slug": "cpp-module-01",
+  "name": "CPP Module 01",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1340": {
+  "slug": "cpp-module-02",
+  "name": "CPP Module 02",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1341": {
+  "slug": "cpp-module-03",
+  "name": "CPP Module 03",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1342": {
+  "slug": "cpp-module-04",
+  "name": "CPP Module 04",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1343": {
+  "slug": "cpp-module-05",
+  "name": "CPP Module 05",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1344": {
+  "slug": "cpp-module-06",
+  "name": "CPP Module 06",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1345": {
+  "slug": "cpp-module-07",
+  "name": "CPP Module 07",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1346": {
+  "slug": "cpp-module-08",
+  "name": "CPP Module 08",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1379": {
+  "slug": "42cursus-ft_hangouts",
+  "name": "ft_hangouts",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1381": {
+  "slug": "42cursus-taskmaster",
+  "name": "taskmaster",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1382": {
+  "slug": "42cursus-computorv1",
+  "name": "computorv1",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1383": {
+  "slug": "42cursus-gomoku",
+  "name": "gomoku",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1384": {
+  "slug": "42cursus-expert-system",
+  "name": "expert-system",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1385": {
+  "slug": "42cursus-n-puzzle",
+  "name": "n-puzzle",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1386": {
+  "slug": "42cursus-nibbler",
+  "name": "nibbler",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1387": {
+  "slug": "42cursus-42run",
+  "name": "42run",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1388": {
+  "slug": "42cursus-strace",
+  "name": "strace",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1389": {
+  "slug": "42cursus-bomberman",
+  "name": "bomberman",
+  "st": 200,
+  "kind": "Group",
+  "min": 4,
+  "max": 5
+ },
+ "1390": {
+  "slug": "42cursus-scop",
+  "name": "scop",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1391": {
+  "slug": "42cursus-ft_linear_regression",
+  "name": "ft_linear_regression",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1392": {
+  "slug": "42cursus-krpsim",
+  "name": "krpsim",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "1393": {
+  "slug": "42cursus-rubik",
+  "name": "rubik",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1394": {
+  "slug": "42cursus-humangl",
+  "name": "humangl",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1395": {
+  "slug": "42cursus-swifty-companion",
+  "name": "swifty-companion",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1396": {
+  "slug": "42cursus-camagru",
+  "name": "camagru",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1397": {
+  "slug": "42cursus-ft_ping",
+  "name": "ft_ping",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1399": {
+  "slug": "42cursus-ft_traceroute",
+  "name": "ft_traceroute",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1400": {
+  "slug": "42cursus-ft_nmap",
+  "name": "ft_nmap",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1401": {
+  "slug": "42cursus-matcha",
+  "name": "matcha",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1402": {
+  "slug": "42cursus-hypertube",
+  "name": "hypertube",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 4
+ },
+ "1403": {
+  "slug": "42cursus-ft_turing",
+  "name": "ft_turing",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1404": {
+  "slug": "42cursus-snow-crash",
+  "name": "snow-crash",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1405": {
+  "slug": "42cursus-darkly",
+  "name": "darkly",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1406": {
+  "slug": "42cursus-swifty-proteins",
+  "name": "swifty-proteins",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1407": {
+  "slug": "42cursus-ft_ality",
+  "name": "ft_ality",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1408": {
+  "slug": "42cursus-xv",
+  "name": "xv",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 4
+ },
+ "1409": {
+  "slug": "42cursus-in-the-shadows",
+  "name": "in-the-shadows",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1410": {
+  "slug": "42cursus-particle-system",
+  "name": "particle-system",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1414": {
+  "slug": "42cursus-cloud-1",
+  "name": "cloud-1",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1415": {
+  "slug": "42cursus-ft_linux",
+  "name": "ft_linux",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1416": {
+  "slug": "42cursus-little-penguin-1",
+  "name": "little-penguin-1",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1417": {
+  "slug": "42cursus-rainfall",
+  "name": "rainfall",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1418": {
+  "slug": "42cursus-dr-quine",
+  "name": "dr-quine",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1419": {
+  "slug": "42cursus-woody-woodpacker",
+  "name": "woody-woodpacker",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1420": {
+  "slug": "42cursus-matt-daemon",
+  "name": "matt-daemon",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1421": {
+  "slug": "42cursus-process-and-memory",
+  "name": "process-and-memory",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1422": {
+  "slug": "42cursus-drivers-and-interrupts",
+  "name": "drivers-and-interrupts",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1423": {
+  "slug": "42cursus-filesystem",
+  "name": "filesystem",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1424": {
+  "slug": "42cursus-kfs-2",
+  "name": "kfs-2",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1425": {
+  "slug": "42cursus-kfs-1",
+  "name": "kfs-1",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1426": {
+  "slug": "42cursus-kfs-3",
+  "name": "kfs-3",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1427": {
+  "slug": "42cursus-music-room",
+  "name": "music-room",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 4
+ },
+ "1428": {
+  "slug": "42cursus-red-tetris",
+  "name": "red-tetris",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1429": {
+  "slug": "42cursus-h42n42",
+  "name": "h42n42",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1430": {
+  "slug": "42cursus-famine",
+  "name": "famine",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1431": {
+  "slug": "42cursus-kfs-4",
+  "name": "kfs-4",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1432": {
+  "slug": "42cursus-kfs-5",
+  "name": "kfs-5",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1433": {
+  "slug": "42cursus-computorv2",
+  "name": "computorv2",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1435": {
+  "slug": "42cursus-avaj-launcher",
+  "name": "avaj-launcher",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1436": {
+  "slug": "42cursus-swingy",
+  "name": "swingy",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1437": {
+  "slug": "42cursus-fix-me",
+  "name": "fix-me",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1438": {
+  "slug": "42cursus-kfs-6",
+  "name": "kfs-6",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1439": {
+  "slug": "42cursus-kfs-7",
+  "name": "kfs-7",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1440": {
+  "slug": "42cursus-kfs-8",
+  "name": "kfs-8",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1441": {
+  "slug": "42cursus-kfs-9",
+  "name": "kfs-9",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1442": {
+  "slug": "42cursus-kfs-x",
+  "name": "kfs-x",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1443": {
+  "slug": "42cursus-pestilence",
+  "name": "pestilence",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1444": {
+  "slug": "42cursus-war",
+  "name": "war",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1445": {
+  "slug": "42cursus-death",
+  "name": "death",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1446": {
+  "slug": "42cursus-boot2root",
+  "name": "boot2root",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 4
+ },
+ "1447": {
+  "slug": "42cursus-ft_shield",
+  "name": "ft_shield",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1448": {
+  "slug": "42cursus-override",
+  "name": "override",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1449": {
+  "slug": "42cursus-ft_vox",
+  "name": "ft_vox",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1450": {
+  "slug": "42cursus-ft_ssl_rsa",
+  "name": "ft_ssl_rsa",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1451": {
+  "slug": "42cursus-ft_ssl_md5",
+  "name": "ft_ssl_md5",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1452": {
+  "slug": "42cursus-ft_ssl_des",
+  "name": "ft_ssl_des",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1453": {
+  "slug": "42cursus-dslr",
+  "name": "dslr",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1454": {
+  "slug": "42cursus-shaderpixel",
+  "name": "shaderpixel",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1455": {
+  "slug": "42cursus-guimp",
+  "name": "guimp",
+  "st": 200,
+  "kind": "Group",
+  "min": 3,
+  "max": 3
+ },
+ "1456": {
+  "slug": "42cursus-userspace_digressions",
+  "name": "userspace_digressions",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1457": {
+  "slug": "42cursus-multilayer-perceptron",
+  "name": "multilayer-perceptron",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1458": {
+  "slug": "42cursus-doom-nukem",
+  "name": "doom-nukem",
+  "st": 200,
+  "kind": "Group",
+  "min": 3,
+  "max": 4
+ },
+ "1460": {
+  "slug": "42cursus-total-perspective-vortex",
+  "name": "total-perspective-vortex",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1461": {
+  "slug": "42cursus-abstract-vm",
+  "name": "abstract-vm",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1462": {
+  "slug": "42cursus-mod1",
+  "name": "mod1",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1463": {
+  "slug": "42cursus-zappy",
+  "name": "zappy",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 4
+ },
+ "1464": {
+  "slug": "42cursus-lem-ipc",
+  "name": "lem-ipc",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1466": {
+  "slug": "42cursus-ft_script",
+  "name": "ft_script",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1467": {
+  "slug": "nm",
+  "name": "nm",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1468": {
+  "slug": "42cursus-malloc",
+  "name": "malloc",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1469": {
+  "slug": "42cursus-ft_select",
+  "name": "ft_select",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1470": {
+  "slug": "42cursus-lem_in",
+  "name": "lem_in",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1471": {
+  "slug": "42cursus-push_swap",
+  "name": "push_swap",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1475": {
+  "slug": "42cursus-corewar",
+  "name": "corewar",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 4
+ },
+ "1476": {
+  "slug": "42cursus-fract-ol",
+  "name": "fract-ol",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1479": {
+  "slug": "42cursus-ft_ls",
+  "name": "ft_ls",
+  "st": 200,
+  "kind": "Solo",
+  "min": 1,
+  "max": 2
+ },
+ "1635": {
+  "slug": "open-project",
+  "name": "Open Project",
+  "st": 200,
+  "kind": "Group",
+  "min": 4,
+  "max": 5
+ },
+ "1638": {
+  "slug": "work-experience-i",
+  "name": "Work Experience I",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1644": {
+  "slug": "work-experience-ii",
+  "name": "Work Experience II",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1650": {
+  "slug": "part_time-i",
+  "name": "Part_Time I",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1656": {
+  "slug": "part_time-ii",
+  "name": "Part_Time II",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1662": {
+  "slug": "startup-experience",
+  "name": "Startup Experience",
+  "st": 200,
+  "kind": "Solo",
+  "min": 1,
+  "max": 2
+ },
+ "1840": {
+  "slug": "ft_malcolm",
+  "name": "ft_malcolm",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1854": {
+  "slug": "42cursus-42sh",
+  "name": "42sh",
+  "st": 200,
+  "kind": "Group",
+  "min": 4,
+  "max": 5
+ },
+ "1855": {
+  "slug": "42cursus-rt",
+  "name": "rt",
+  "st": 200,
+  "kind": "Group",
+  "min": 3,
+  "max": 4
+ },
+ "1857": {
+  "slug": "42cursus-apprentissage-2-ans-1ere-annee",
+  "name": "Apprentissage 2 ans - 1ère année",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1865": {
+  "slug": "apprentissage-2-ans-2eme-annee",
+  "name": " Apprentissage 2 ans - 2ème année",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1873": {
+  "slug": "apprentissage-1-an",
+  "name": "Apprentissage 1 an",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1883": {
+  "slug": "freddie-mercury",
+  "name": "freddie-mercury",
+  "st": 200,
+  "kind": "Group",
+  "min": 1,
+  "max": 2
+ },
+ "1962": {
+  "slug": "ft_newton",
+  "name": "ft_newton",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "1983": {
+  "slug": "inception",
+  "name": "Inception",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "1994": {
+  "slug": "born2beroot",
+  "name": "Born2beroot",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2004": {
+  "slug": "pipex",
+  "name": "pipex",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2005": {
+  "slug": "minitalk",
+  "name": "minitalk",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2007": {
+  "slug": "netpractice",
+  "name": "NetPractice",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2008": {
+  "slug": "42cursus-fdf",
+  "name": "FdF",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2009": {
+  "slug": "so_long",
+  "name": "so_long",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2064": {
+  "slug": "inception-of-things",
+  "name": "Inception-of-Things",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "2065": {
+  "slug": "42cursus-rushes",
+  "name": "Rushes",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2071": {
+  "slug": "bgp-at-doors-of-autonomous-systems-is-simple",
+  "name": " Bgp At Doors of Autonomous Systems is Simple",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "2076": {
+  "slug": "ready-set-boole",
+  "name": "ready set boole",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2077": {
+  "slug": "matrix",
+  "name": "matrix",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2097": {
+  "slug": "tinky-winkey",
+  "name": "tinky-winkey",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "2098": {
+  "slug": "ft_kalman",
+  "name": "ft_kalman",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "2126": {
+  "slug": "ft_minecraft",
+  "name": "ft_minecraft",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 4
+ },
+ "2179": {
+  "slug": "piscine-ror",
+  "name": "Piscine RoR",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2189": {
+  "slug": "piscine-django",
+  "name": "Piscine Django",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2199": {
+  "slug": "piscine-symfony",
+  "name": "Piscine Symfony",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2225": {
+  "slug": "ftl_quantum",
+  "name": "Ftl_quantum",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2228": {
+  "slug": "42cursus-piscine-ocaml",
+  "name": "Piscine ocaml",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2267": {
+  "slug": "python-for-data-science",
+  "name": "Python for Data Science",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2288": {
+  "slug": "unity",
+  "name": "Unity",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2295": {
+  "slug": "piscine-data-science",
+  "name": "Piscine Data Science",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2309": {
+  "slug": "cpp-module-09",
+  "name": "CPP Module 09",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2346": {
+  "slug": "cybersecurity",
+  "name": "Cybersecurity",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2355": {
+  "slug": "mobile",
+  "name": "Mobile",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2364": {
+  "slug": "piscine-object",
+  "name": "Piscine Object",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2371": {
+  "slug": "abstract_data",
+  "name": "Abstract_data",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2372": {
+  "slug": "leaffliction",
+  "name": "Leaffliction",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "2380": {
+  "slug": "ft_lex",
+  "name": "ft_lex",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2381": {
+  "slug": "ft_yacc",
+  "name": "ft_yacc",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2393": {
+  "slug": "unleashthebox",
+  "name": "UnleashTheBox",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2485": {
+  "slug": "tokenizer",
+  "name": "Tokenizer",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2531": {
+  "slug": "ft_kleene",
+  "name": "ft_kleene",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2550": {
+  "slug": "libftpp",
+  "name": "libftpp",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2551": {
+  "slug": "learn2slither",
+  "name": "Learn2Slither",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2552": {
+  "slug": "peace_break",
+  "name": "Peace_Break",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "2553": {
+  "slug": "very_real_engine",
+  "name": "Very_Real_Engine",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 4
+ },
+ "2560": {
+  "slug": "ft_iac",
+  "name": "ft_IaC",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "2561": {
+  "slug": "fr-alternance-rncp6-1-an",
+  "name": "FR - Alternance - RNCP6 - 1 an",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2562": {
+  "slug": "fr-alternance-rncp6-2-ans",
+  "name": "FR - Alternance - RNCP6 - 2 ans",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2563": {
+  "slug": "fr-alternance-rncp7-1-an",
+  "name": "FR - Alternance - RNCP7 - 1 an",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2564": {
+  "slug": "fr-alternance-rncp7-2-ans",
+  "name": "FR - Alternance - RNCP7 - 2 ans",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2600": {
+  "slug": "tokenizeart",
+  "name": "TokenizeArt",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2606": {
+  "slug": "b",
+  "name": "B",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2623": {
+  "slug": "42_collaborative_resume",
+  "name": "ft_resume",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2625": {
+  "slug": "cc1",
+  "name": "cc1",
+  "st": 200,
+  "kind": "Group",
+  "min": 1,
+  "max": 2
+ },
+ "2686": {
+  "slug": "42next-born2beroot",
+  "name": "Born2beroot",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2687": {
+  "slug": "42next-push_swap",
+  "name": "push_swap",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "2688": {
+  "slug": "a-maze-ing",
+  "name": "A-Maze-ing",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "2689": {
+  "slug": "call-me-maybe",
+  "name": "Call Me Maybe",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2690": {
+  "slug": "python-module-00",
+  "name": "Python Module 00",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2691": {
+  "slug": "python-module-01",
+  "name": "Python Module 01",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2692": {
+  "slug": "python-module-02",
+  "name": "Python Module 02",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2693": {
+  "slug": "python-module-03",
+  "name": "Python Module 03",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2694": {
+  "slug": "python-module-04",
+  "name": "Python Module 04",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2695": {
+  "slug": "python-module-05",
+  "name": "Python Module 05",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2696": {
+  "slug": "python-module-06",
+  "name": "Python Module 06",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2697": {
+  "slug": "python-module-07",
+  "name": "Python Module 07",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2698": {
+  "slug": "python-module-08",
+  "name": "Python Module 08",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2699": {
+  "slug": "python-module-10",
+  "name": "Python Module 10",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2700": {
+  "slug": "rag-against-the-machine",
+  "name": "RAG against the machine",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2701": {
+  "slug": "the-answer-protocol",
+  "name": "The Answer Protocol",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "2702": {
+  "slug": "tree_nity",
+  "name": "tree_nity",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "2703": {
+  "slug": "agent-smith",
+  "name": "Agent Smith",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "2704": {
+  "slug": "codexion",
+  "name": "Codexion",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2705": {
+  "slug": "fly-in",
+  "name": "Fly-in",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2706": {
+  "slug": "pac-man",
+  "name": "Pac-Man",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "2707": {
+  "slug": "python-module-09",
+  "name": "Python Module 09",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2708": {
+  "slug": "42next-exam-rank-02",
+  "name": "Exam Rank 02",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2709": {
+  "slug": "42next-exam-rank-03",
+  "name": "Exam Rank 03",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2710": {
+  "slug": "42next-exam-rank-04",
+  "name": "Exam Rank 04",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2711": {
+  "slug": "42next-exam-rank-05",
+  "name": "Exam Rank 05",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2712": {
+  "slug": "42next-exam-rank-06",
+  "name": "Exam Rank 06",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2719": {
+  "slug": "tokenzwap",
+  "name": "TokenZwap",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2743": {
+  "slug": "42cursus-agent-smith",
+  "name": "Agent smith",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "2744": {
+  "slug": "42cursus-rag-against-the-machine",
+  "name": "RAG against the machine ",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2745": {
+  "slug": "42cursus-call-me-maybe",
+  "name": "Call Me Maybe",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2746": {
+  "slug": "inception-of-context",
+  "name": "Inception of context",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "2747": {
+  "slug": "ft_lgtm",
+  "name": "ft_lgtm",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 2
+ },
+ "2748": {
+  "slug": "supercharge",
+  "name": "Supercharge",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2749": {
+  "slug": "retroemu",
+  "name": "RetroEmu",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 4
+ },
+ "2750": {
+  "slug": "inception-of-wisdom",
+  "name": "Inception of wisdom",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "2751": {
+  "slug": "datomic",
+  "name": "Datomic",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2752": {
+  "slug": "ecomesh",
+  "name": "Ecomesh",
+  "st": 200,
+  "kind": "Group",
+  "min": 2,
+  "max": 3
+ },
+ "2763": {
+  "slug": "ai-rushes",
+  "name": "AI Rushes",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2773": {
+  "slug": "piscine-deep-learning",
+  "name": "Piscine Deep Learning",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2781": {
+  "slug": "python-module-05-bis",
+  "name": "Python Module 05 bis",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ },
+ "2782": {
+  "slug": "python-module-06-bis",
+  "name": "Python Module 06 bis",
+  "st": 200,
+  "kind": "Solo",
+  "min": null,
+  "max": null
+ }
+}

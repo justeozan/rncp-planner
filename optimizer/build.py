@@ -37,8 +37,9 @@ CAT_CODE = {
 _W = {}
 
 
-def _init(time_model):
+def _init(time_model, bonus=1.25, allow_risky=False):
     _W["time_model"] = time_model
+    _W["opts"] = {"bonus": bonus, "allow_risky": allow_risky}
     _W["ds"] = {}
 
 
@@ -46,7 +47,7 @@ def _dataset(off):
     """Un Dataset par reglage de chaines, construit une seule fois par process."""
     key = tuple(sorted(off))
     if key not in _W["ds"]:
-        _W["ds"][key] = pl.Dataset(time_model=_W["time_model"], chains_off=key)
+        _W["ds"][key] = pl.Dataset(time_model=_W["time_model"], chains_off=key, **_W["opts"])
     return _W["ds"][key]
 
 
@@ -89,7 +90,8 @@ def collect(chains, base_xp, done, args):
 
     n = 0
     with ProcessPoolExecutor(max_workers=args.workers, initializer=_init,
-                             initargs=(args.time_model,)) as ex:
+                             initargs=(args.time_model, args.bonus,
+                                       args.allow_risky)) as ex:
         for mask, key, obj, res in ex.map(_job, tasks):
             variants[str(mask)][key][obj] = res
             n += 1
@@ -126,7 +128,8 @@ def alternatives(combos, off, base_xp, done, args):
     un projet des meilleurs plans et on relance la recherche (deux niveaux).
     Les plans distincts sont gardes dans `alts` ; l'interface les trie selon
     le mode (jours ou nombre de projets)."""
-    ds = pl.Dataset(time_model=args.time_model)
+    ds = pl.Dataset(time_model=args.time_model, bonus=args.bonus,
+                    allow_risky=args.allow_risky)
     found = {}   # key -> {frozenset(ids): plan}
     for key, row in combos.items():
         found[key] = {}
@@ -141,7 +144,8 @@ def alternatives(combos, off, base_xp, done, args):
         level_tasks.sort(key=lambda t: len(t[2]), reverse=True)
         print(f"  alternatives {label} : {len(level_tasks)} recherches", flush=True)
         with ProcessPoolExecutor(max_workers=args.workers, initializer=_init,
-                                 initargs=(args.time_model,)) as ex:
+                                 initargs=(args.time_model, args.bonus,
+                                       args.allow_risky)) as ex:
             for (_m, key, _o, res), task in zip(ex.map(_job, level_tasks), level_tasks):
                 if res["feasible"]:
                     res["proven"] = False
@@ -252,6 +256,9 @@ def project_table(ds, variants):
             row["ch"] = chain_of[pid]
         if ds.prereqs.get(pid):
             row["pre"] = ds.prereqs[pid]
+        if pid in ds.team_only:
+            team = ds.teams[pid]
+            row["tm"] = [team["min"], team["max"] or team["min"]]
         out[str(pid)] = row
     return out
 
@@ -290,6 +297,10 @@ def main():
     ap.add_argument("--alt-days-budget", type=int, default=150_000)
     ap.add_argument("--workers", type=int, default=os.cpu_count() or 4)
     ap.add_argument("--time-model", choices=("clamped", "xp", "raw"), default="clamped")
+    ap.add_argument("--bonus", type=float, default=1.25,
+                    help="multiplicateur d'XP vise (1.25 = 125 %%, stages exclus)")
+    ap.add_argument("--allow-risky", action="store_true",
+                    help="autorise les projets jamais valides")
     ap.add_argument("--out", default=os.path.normpath(
         os.path.join(HERE, "..", "public", "planner.html")))
     ap.add_argument("--json-out", default=os.path.normpath(
@@ -297,7 +308,8 @@ def main():
                     help="donnees lues par la page /planner du site Next.js")
     args = ap.parse_args()
 
-    ds = pl.Dataset(time_model=args.time_model)
+    ds = pl.Dataset(time_model=args.time_model, bonus=args.bonus,
+                    allow_risky=args.allow_risky)
     if args.xp is not None:
         base_xp, level = args.xp, None
     elif args.level is not None:
@@ -341,7 +353,8 @@ def main():
             "excluded": len(ds.excluded), "risky": sorted(ds.risky),
             "cats": {v: k for k, v in CAT_CODE.items()},
             "prereqs": len(ds.prereqs),
-            "source": "gcc.42.fr + holy graph intra Lyon (2026-11-20)",
+            "bonus": ds.bonus, "allow_risky": bool(args.allow_risky),
+            "source": "gcc.42.fr + holy graph intra Lyon (2026-11-20) + equipes intra (2026-11-25)",
         },
     }
     with open(os.path.join(HERE, "template.html")) as fh:

@@ -62,6 +62,8 @@ export interface Project {
   sl?: string;
   /** 1 when the project is a piscine. */
   pi?: 1;
+  /** Team size the intra imposes [min, max]; absent = can be done solo. */
+  tm?: [number, number];
 }
 
 export interface TitleInfo {
@@ -93,6 +95,8 @@ export interface PlannerData {
     rate: number;
     cats: Record<string, string>;
     risky: number[];
+    /** XP multiplier assumed for every project except internships (1.25 = 125 %). */
+    bonus: number;
   };
 }
 

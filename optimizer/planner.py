@@ -43,9 +43,21 @@ def _load(name):
 
 # ══════════════════════════════════════════════════════════════ donnees ══════
 class Dataset:
-    def __init__(self, time_model="clamped", chains_off=()):
+    def __init__(self, time_model="clamped", chains_off=(), bonus=1.0, campus=True,
+                 allow_risky=False):
+        """bonus  : multiplicateur d'XP (1.25 = projets finis a 125 %). Ne
+                    s'applique ni aux stages ni aux modules de piscine.
+        campus : un projet absent du holy graph de Lyon (hors stages) est
+                 indisponible : on ne peut pas s'y inscrire.
+        allow_risky : autorise les projets jamais valides (0 validation).
+
+        Equipes : self.teams vient de l'intra (data/intra_teams_raw.json) et
+        self.team_only liste les projets a faire a 2 ou plus. Pas d'option
+        « solo » : les titres exigent des projets de groupe, et 62 des 67 projets
+        du pool « Projets de groupe » imposent une equipe -> aucun plan solo."""
         self.time_model = time_model
         self.chains_off = frozenset(chains_off)
+        self.bonus = float(bonus)
         raw = _load("projects_21.json")["projects"]
         self.projects = {p["id"]: p for p in raw}
         self.rules = _load("rules.json")
@@ -55,10 +67,23 @@ class Dataset:
         self.common_core = set(self.rules["common_core"]["projects"])
         self.excluded = {int(k): v for k, v in self.rules["excluded"]["projects"].items()}
         self.min_completions = self.rules["availability"]["min_completions"]
+        self.teams = {int(k): v for k, v in _load("intra_teams_raw.json").items()}
+        # projets ou l'intra impose une equipe d'au moins 2
+        self.team_only = {pid for pid, t in self.teams.items()
+                          if t.get("kind") == "Group" and (t.get("min") or 0) >= 2}
 
         self._build_titles(_load("rncp_21.json"))
+        self.module_ids = {c["id"] if isinstance(c, dict) else c
+                           for p in self.projects.values() for c in (p.get("children") or [])}
+        if campus:
+            for pid in self.projects:
+                if (pid not in self.teams and pid not in self.exp_pool
+                        and pid not in self.module_ids and pid not in self.common_core):
+                    self.excluded.setdefault(pid, "absent du holy graph Lyon")
         self._build_durations()
         self._build_groups()
+        # projets interdits a tous les plans (en plus de self.excluded)
+        self.forbidden = frozenset(() if allow_risky else self.risky)
 
     # ── titres et pools ──
     def _build_titles(self, raw):
@@ -159,9 +184,9 @@ class Dataset:
         for cid, kids in sorted(kids_of.items()):
             if cid in self.excluded or cid in in_chain or cid in self.common_core:
                 continue
-            own = self.projects[cid]["difficulty"] or 0
+            own = self.xp(cid)
             live = [k for k in kids if k not in self.excluded]
-            kids_xp = sum(self.projects[k]["difficulty"] or 0 for k in live)
+            kids_xp = sum(self.xp(k) for k in live)
             if own <= 0 and kids_xp <= 0:
                 continue
             in_pool = cid in self.rncp_pool
@@ -210,7 +235,7 @@ class Dataset:
             pending[pid] = {
                 "kind": "single", "key": f"p{pid}", "label": self.name(pid), "unit": pid,
                 "choices": [{"ids": (), "cost": 0, "xp": 0.0, "days": 0.0},
-                            {"ids": (pid,), "cost": 1, "xp": float(p["difficulty"]),
+                            {"ids": (pid,), "cost": 1, "xp": float(self.xp(pid)),
                              "days": self._days[pid]}]}
 
         self._build_prereqs(pending)
@@ -314,7 +339,10 @@ class Dataset:
         return (self.projects[pid]["name"] or "").strip() or f"#{pid}"
 
     def xp(self, pid):
-        return self.projects[pid]["difficulty"] or 0
+        base = self.projects[pid]["difficulty"] or 0
+        if self.bonus == 1.0 or pid in self.exp_pool or pid in self.module_ids:
+            return base
+        return int(round(base * self.bonus))
 
     def days(self, pid):
         return self._days.get(pid, 0.0)
@@ -330,6 +358,8 @@ class Dataset:
             t.append("exp")
         if pid in self.risky:
             t.append("0 validation")
+        if pid in self.team_only:
+            t.append("groupe")
         return t
 
 
@@ -352,6 +382,7 @@ def build_slots(ds, done, banned=frozenset()):
     2 et 3, et ces trois-la sont bien trois projets de plus.
     """
     slots = []
+    banned = frozenset(banned) | getattr(ds, "forbidden", frozenset())
     for g in ds.groups:
         uniq, seen = [], set()
         for ch in g["choices"]:
@@ -853,6 +884,9 @@ def check(ds, combo, ids, base_xp, done):
     ):
         have = sum(1 for i in sel if i in pool)
         rows.append({"label": label, "need": n, "have": have, "unit": "n", "ok": have >= n})
+    rows.append({"label": "Projets en equipe", "need": 0,
+                 "have": sum(1 for i in sel if i in ds.team_only),
+                 "unit": "n", "ok": None})
     rows.append({"label": "Events", "need": max(ds.titles[k]["n_events"] for k in combo),
                  "have": None, "unit": "n", "ok": None})
     return rows
@@ -981,12 +1015,17 @@ def main():
     ap.add_argument("--time-model", choices=("clamped", "xp", "raw"), default="clamped")
     ap.add_argument("--chains-off", default="",
                     help="ids de chaines de prerequis a ignorer (ex: virus,kfs)")
+    ap.add_argument("--bonus", type=float, default=1.25,
+                    help="multiplicateur d'XP vise (1.25 = 125 %%, stages exclus)")
+    ap.add_argument("--allow-risky", action="store_true",
+                    help="autorise les projets jamais valides")
     ap.add_argument("--json", default=None)
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
 
     ds = Dataset(time_model=args.time_model,
-                 chains_off={x.strip() for x in args.chains_off.split(",") if x.strip()})
+                 chains_off={x.strip() for x in args.chains_off.split(",") if x.strip()},
+                 bonus=args.bonus, allow_risky=args.allow_risky)
     base_xp = args.xp if args.xp is not None else ds.levels[args.level]
     done = {int(x) for x in args.done.split(",") if x.strip()}
 
@@ -1027,7 +1066,9 @@ def main():
                     extra = (f" +{u['n']-1} modules" if u["n"] > 1 and u["kind"] == "bundle"
                              else (f" ({u['n']} projets)" if u["n"] > 1 else ""))
                     tg = sorted({t for i in u["ids"] for t in ds.tags(i)})
-                    print(f"   {u['xp']:>7} XP {u['days']:>6.0f} j  {u['label'][:40]:<41}"
+                    label = (" > ".join(ds.name(i) for i in u["ids"]) if u["kind"] == "dag"
+                             else u["label"])
+                    print(f"   {u['xp']:>7} XP {u['days']:>6.0f} j  {label[:40]:<41}"
                           f"{extra}{' ' + ' '.join('[' + t + ']' for t in tg) if tg else ''}")
                 print("   conditions:")
                 for c in plan["checks"]:
